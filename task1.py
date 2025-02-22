@@ -1,6 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
+networks = ["abilene.txt", "atlanta.txt", "nobel-eu.txt", "nobel-germany.txt"]
+
 def retrieve_data(data):
 
     # cria gráfico direcionado
@@ -85,11 +87,32 @@ def draw_network(G):
     plt.axis('equal')
     plt.show()
 
-with open('atlanta.txt', 'r') as file:
+
+while True: 
+    
+    print(" \n-------------- Redes disponíveis: ---------------")
+    for i, ficheiro in enumerate(networks, 1):
+        print(f"{i}. {ficheiro}")
+    print("----------------------------------------------------")
+    escolha = int(input("Digite o número da rede que deseja analisar: ")) - 1
+    if 0 <= escolha < len(networks):
+        with open(networks[escolha], 'r') as file:
+            network_data = file.read()
+            # criar grafo a partir do ficheiro
+            G = retrieve_data(network_data)
+            # desenhar grafo
+            draw_network(G)
+            break
+    else:
+        print("Número inválido. Por favor, escolha um número da lista.")
+
+
+
+#with open('nobel-germany.txt', 'r') as file:
     network_data = file.read()
 
 # criar grafo a partir do ficheiro
-G = retrieve_data(network_data)
+#G = retrieve_data(network_data)
 
 # desenhar grafo
-draw_network(G)
+#draw_network(G)
