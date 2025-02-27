@@ -1,11 +1,22 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 
-networks = ["abilene.txt", "atlanta.txt", "nobel-eu.txt", "nobel-germany.txt"]
 
 def retrieve_data(data):
+    
+    """
+    @brief Processes input data to create a directed graph.
+    
+    This function extracts node and link information from the input data provided in the `data` string.
+    It creates a directed graph where each node is added with its coordinates and each link is established
+    between the appropriate nodes. It removes unnecessary lines and comments, and processes sections
+    specifically for nodes and links.
 
-    # cria gráfico direcionado
+    @param data The input string containing the data to be parsed. It should contain sections for nodes and links.
+    @return A directed graph (DiGraph) where nodes are connected by links as specified in the input data.
+    """
+
+    # cria um grafo direcionado
     G = nx.DiGraph()
     
     # fetch secção dos nós
@@ -68,6 +79,16 @@ def retrieve_data(data):
     return G
 
 def draw_network(G):
+    """
+    @brief Draws the network graph using the provided graph data.
+    
+    This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
+    The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
+    as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
+    The graph's title is set to 'Atlanta Network'.
+    
+    @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
+    """
 
     pos = nx.get_node_attributes(G, 'pos')
 
@@ -86,33 +107,3 @@ def draw_network(G):
     plt.title('Atlanta Network')
     plt.axis('equal')
     plt.show()
-
-
-while True: 
-    
-    print(" \n-------------- Redes disponíveis: ---------------")
-    for i, ficheiro in enumerate(networks, 1):
-        print(f"{i}. {ficheiro}")
-    print("----------------------------------------------------")
-    escolha = int(input("Digite o número da rede que deseja analisar: ")) - 1
-    if 0 <= escolha < len(networks):
-        with open(networks[escolha], 'r') as file:
-            network_data = file.read()
-            # criar grafo a partir do ficheiro
-            G = retrieve_data(network_data)
-            # desenhar grafo
-            draw_network(G)
-            break
-    else:
-        print("Número inválido. Por favor, escolha um número da lista.")
-
-
-
-#with open('nobel-germany.txt', 'r') as file:
-    network_data = file.read()
-
-# criar grafo a partir do ficheiro
-#G = retrieve_data(network_data)
-
-# desenhar grafo
-#draw_network(G)
