@@ -70,6 +70,7 @@ def retrieve_data(data):
         # divide a aresta em source e target
         source, target = aresta.split()
         G.add_edge(source, target)
+        G.add_edge(target, source)
 
     return G, node_mapping
 
