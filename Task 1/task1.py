@@ -1,7 +1,6 @@
 from functions import retrieve_data, draw_network
 import os
 
-
 """
     @brief Displays a menu for the user to select a network file to analyze.
 
@@ -20,6 +19,7 @@ while True:
     print(" \n-------------- Redes disponíveis: ---------------")
     for i, ficheiro in enumerate(networks, 1):
         print(f"{i}. {ficheiro}")
+    
     print("5. Inserir outra rede")
     print("6. Sair")
     print("----------------------------------------------------")
@@ -54,3 +54,5 @@ while True:
     else:
         os.system('cls')
         print("Número inválido. Por favor, escolha um número da lista.")
+
+    os.system('cls')
