@@ -1,0 +1,43 @@
+\doxysection{functions Namespace Reference}
+\hypertarget{namespacefunctions}{}\label{namespacefunctions}\index{functions@{functions}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacefunctions_a4e0f74e73d1212131abe6b9572fae2f0}{retrieve\+\_\+data}} (data)
+\item 
+\mbox{\hyperlink{namespacefunctions_a85371260271725394535a915c8292b1a}{draw\+\_\+network}} (G)
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacefunctions_a85371260271725394535a915c8292b1a}\index{functions@{functions}!draw\_network@{draw\_network}}
+\index{draw\_network@{draw\_network}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{draw\_network()}{draw\_network()}}
+{\footnotesize\ttfamily \label{namespacefunctions_a85371260271725394535a915c8292b1a} 
+functions.\+draw\+\_\+network (\begin{DoxyParamCaption}\item[{}]{G}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Draws the network graph using the provided graph data.
+
+This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
+The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
+as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
+
+@param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
+\end{DoxyVerb}
+ \Hypertarget{namespacefunctions_a4e0f74e73d1212131abe6b9572fae2f0}\index{functions@{functions}!retrieve\_data@{retrieve\_data}}
+\index{retrieve\_data@{retrieve\_data}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{retrieve\_data()}{retrieve\_data()}}
+{\footnotesize\ttfamily \label{namespacefunctions_a4e0f74e73d1212131abe6b9572fae2f0} 
+functions.\+retrieve\+\_\+data (\begin{DoxyParamCaption}\item[{}]{data}{}\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}@brief Processes input data to create a directed graph.
+
+This function extracts node and link information from the input data provided in the `data` string.
+It creates a directed graph where each node is added with its coordinates and each link is established
+between the appropriate nodes. It removes unnecessary lines and comments, and processes sections
+specifically for nodes and links.
+
+@param data The input string containing the data to be parsed. It should contain sections for nodes and links.
+@return A directed graph (DiGraph) where nodes are connected by links as specified in the input data.
+\end{DoxyVerb}
+ 
