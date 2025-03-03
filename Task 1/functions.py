@@ -85,7 +85,6 @@ def draw_network(G):
     This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
     The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
     as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
-    The graph's title is set to 'Atlanta Network'.
     
     @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
     """
@@ -104,6 +103,5 @@ def draw_network(G):
             edge_color='red',
             arrows=True)
     
-    plt.title('Atlanta Network')
     plt.axis('equal')
     plt.show()

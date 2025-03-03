@@ -102,7 +102,7 @@ def draw_network(G, node_mapping, origem, destino):
     plt.show()
 
 
-def ask_origin_destiny (node_mapping):
+def ask_origin_destiny(node_mapping):
     
     os.system('cls')
     
@@ -124,5 +124,3 @@ def ask_origin_destiny (node_mapping):
             print("\nNúmero inválido. Por favor, escolha um número da lista.")  
     
     return origem, destino
-    
-    
