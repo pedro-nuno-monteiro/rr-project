@@ -1,5 +1,7 @@
 import networkx as nx
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+
 
 def retrieve_data(data):
     
@@ -88,20 +90,26 @@ def draw_network(G):
     
     @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
     """
-
+    # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
 
-    # desenha o gráfico
-    plt.figure(figsize=(10, 5))
-    nx.draw(G, pos,
-            node_color='lightblue',
-            node_size=500,
-            with_labels=True,
-            node_shape='o',
-            font_size=8,
-            font_weight='bold',
-            edge_color='red',
-            arrows=True)
-    
-    plt.axis('equal')
+    # desenha o gráfico e abre em fullscreen para uma melhor visualização
+    fig = plt.figure()
+    mng = plt.get_current_fig_manager()
+    mng.window.state('zoomed') 
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0) 
+
+    # Desenha as arestas do grafo com cor vermelha e setas para indicar direção
+    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True)
+
+     
+
+    # Desenha os retângulos com o nome dos nós
+    nx.draw_networkx_labels(G, pos, font_size=8, font_weight='bold',
+                            bbox=dict(facecolor='lightblue', edgecolor='black', boxstyle='round,pad=0.3'))
+
+    # Remove a moldura da figura para um visual mais limpo
+    plt.box(False)
+
+    # Exibe o gráfico
     plt.show()
