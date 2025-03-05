@@ -39,6 +39,7 @@ while True:
             print("O nome do arquivo deve terminar com '.txt'. Tente novamente.")
             
     elif escolha == 5:
+        os.system('cls')
         print("Obrigada! Volte Sempre!");
         break
 

@@ -4,12 +4,23 @@ import os
 
 
 def retrieve_data(data):
+    
+    """
+    @brief Processes input data to create a directed graph.
+    
+    This function extracts node and link information from the input data provided in the `data` string.
+    It creates a directed graph where each node is added with its coordinates and each link is established
+    between the appropriate nodes. It removes unnecessary lines and comments, and processes sections
+    specifically for nodes and links.
 
+    @param data The input string containing the data to be parsed. It should contain sections for nodes and links.
+    @return A directed graph (DiGraph) where nodes are connected by links as specified in the input data.
+    """
+    
     # cria um grafo direcionado
     G = nx.DiGraph()
     
     node_mapping = {}  
-    #reverse_mapping = {}
     
     # fetch secção dos nós
     nodes_section = data[data.find("NODES ("):data.find("# LINK ")]
@@ -77,33 +88,75 @@ def retrieve_data(data):
 
 def draw_network(G, node_mapping, origem, destino):
 
+    """
+    @brief Draws the network graph using the provided graph data.
+    
+    This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
+    The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
+    as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
+    
+    @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
+    """
+    
+    # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
+    
+    # Cria rótulos no formato "1: Nome"
     labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
-    
-    node_colors = ['lightblue' if nome not in [node_mapping.get(origem), node_mapping.get(destino)] 
-                   else 'green' if nome == node_mapping.get(origem) 
-                   else 'red' 
-                   for nome in G.nodes]
-    
-    # desenha o gráfico
-    plt.figure(figsize=(10, 5))
-    nx.draw(G, pos,
-            node_color=node_colors,
-            node_size=2000,
-            with_labels=True,
-            labels=labels,
-            node_shape='o',
-            font_size=7,
-            font_weight='bold',
-            edge_color='red',
-            arrows=True)
-    
-    plt.title('Topologia da Rede')
-    plt.axis('equal')
+
+    # Verifica se origem e destino existem
+    origem_nome = node_mapping.get(origem, None)
+    destino_nome = node_mapping.get(destino, None)
+
+    if origem_nome is None or destino_nome is None:
+        raise ValueError(f"Os nós origem ({origem}) ou destino ({destino}) não estão no mapeamento.")
+
+    # Define as cores dos nós
+    node_colors = {
+        nome: 'green' if nome == origem_nome else 
+              'red' if nome == destino_nome else 
+              'lightblue'
+        for nome in G.nodes
+    }
+
+    # Criar figura e ajustar para tela cheia
+    fig = plt.figure()
+    mng = plt.get_current_fig_manager()
+    mng.window.state('zoomed')
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+
+    # Desenha as arestas do grafo a vermelho
+    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True)
+
+    # Desenha os rótulos dentro de retângulos coloridos
+    for nome, (x, y) in pos.items():
+        label_text = labels.get(nome, nome)  # Usa "1: Nome" ou só "Nome" se não estiver no dicionário
+        plt.text(x, y, label_text, fontsize=8, fontweight='bold',
+                 bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
+                 horizontalalignment='center', verticalalignment='center')
+
+    # Remove a moldura da figura
+    plt.box(False)
+
+    # Exibe o gráfico
     plt.show()
 
 
 def ask_origin_destiny(node_mapping):
+    
+    """
+    @brief Asks the user to select the origin and destination nodes.
+
+    This function prompts the user to input the numbers corresponding to the origin and 
+    destination nodes. It ensures that the input is valid, checking against the provided 
+    node mapping.
+
+    @param node_mapping Dictionary mapping node numbers to their names.
+
+    @return A tuple (origem, destino) where:
+        @param origem: The selected origin node number.
+        @param destino: The selected destination node number.
+    """
     
     os.system('cls')
     
