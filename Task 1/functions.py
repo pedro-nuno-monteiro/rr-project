@@ -1,6 +1,9 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+import sys
+
+
 
 
 def retrieve_data(data):
@@ -93,10 +96,29 @@ def draw_network(G):
     # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
 
-    # desenha o gráfico e abre em fullscreen para uma melhor visualização
+    # desenha o gráfico, deteta o SO e abre em fullscreen para uma melhor visualização
     fig = plt.figure()
     mng = plt.get_current_fig_manager()
-    mng.window.state('zoomed') 
+    if sys.platform.startswith("linux"):  
+        backend = plt.get_backend()
+        if backend in ["TkAgg", "Qt5Agg", "QtAgg"]:
+            try:
+                mng.full_screen_toggle()  
+            except AttributeError:
+                pass
+        elif backend in ["GTK3Agg", "GTK3Cairo"]:  
+            try:
+                mng.window.maximize()
+            except AttributeError:
+                pass
+
+    elif sys.platform.startswith("win"):  
+        try:
+            mng.window.state("zoomed")  
+        except AttributeError:
+            pass
+
+
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0) 
 
     # Desenha as arestas do grafo com cor vermelha e setas para indicar direção
