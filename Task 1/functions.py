@@ -99,6 +99,7 @@ def draw_network(G):
     # desenha o gráfico, deteta o SO e abre em fullscreen para uma melhor visualização
     fig = plt.figure()
     mng = plt.get_current_fig_manager()
+    
     if sys.platform.startswith("linux"):  
         backend = plt.get_backend()
         if backend in ["TkAgg", "Qt5Agg", "QtAgg"]:
