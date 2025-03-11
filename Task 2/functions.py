@@ -1,7 +1,6 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import os
-import sys
+import os, sys
 
 def retrieve_data(data):
     
@@ -24,14 +23,11 @@ def retrieve_data(data):
     
     # fetch secção dos nós
     nodes_section = data[data.find("NODES ("):data.find("# LINK ")]
-
     nodes_section = nodes_section.split('\n')
 
     linhas_nos = []
     for linha in nodes_section:
-
         linha = linha.strip()
-
         if not (linha.startswith('#') or linha.startswith(')')):
             linhas_nos.append(linha)
 
@@ -45,10 +41,8 @@ def retrieve_data(data):
         no = linha.split('(')
         nome_no = no[0].strip()
         coordenadas = no[1].strip(' )').split()
-
         # adicionar nó
         G.add_node(nome_no, pos = (float(coordenadas[0]), float(coordenadas[1])))
-        
         node_mapping[index] = nome_no
 
     
@@ -58,7 +52,6 @@ def retrieve_data(data):
     linhas_links = []
     for linha in links_section.split('\n'):
         linha = linha.strip()
-
         if not linha.startswith('#'):
             linhas_links.append(linha)
 
@@ -76,31 +69,31 @@ def retrieve_data(data):
 
         # dividir cada linha em nome [esquerda], fonte e destino [meio] e resto [direita]
         # só nos interessa a fonte e o destino de cada aresta
-        aresta = linha.split('(')[1].split(')')[0].strip()
-
-        # divide a aresta em source e target
-        source, target = aresta.split()
-        G.add_edge(source, target)
-        G.add_edge(target, source)
+        elementos = linha.split()
+        source, target = elementos[2], elementos[3]  # Nó origem e destino
+        routing_cost = float(elementos[11])  # Custo da aresta
+        
+        # Adiciona a aresta com custo como atributo
+        # Estamos a guardar na variável 'cost' para ser compatível com o método de Dijkstra
+        G.add_edge(source, target, cost=routing_cost)
+        G.add_edge(target, source, cost=routing_cost)
 
     return G, node_mapping
 
-
 def draw_network(G, node_mapping, origem, destino):
-
     """
     @brief Draws the network graph using the provided graph data.
-    
+
     This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
     The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
     as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
-    
+
     @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
     """
-    
+
     # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
-    
+
     # Cria rótulos no formato "1: Nome"
     labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
 
@@ -113,8 +106,8 @@ def draw_network(G, node_mapping, origem, destino):
 
     # Define as cores dos nós
     node_colors = {
-        nome: 'green' if nome == origem_nome else 
-              'red' if nome == destino_nome else 
+        nome: 'green' if nome == origem_nome else
+              'red' if nome == destino_nome else
               'lightblue'
         for nome in G.nodes
     }
@@ -122,35 +115,38 @@ def draw_network(G, node_mapping, origem, destino):
     # Criar figura e ajustar para tela cheia
     fig = plt.figure()
     mng = plt.get_current_fig_manager()
-    
-    
-    if sys.platform.startswith("linux"):  
+
+    if sys.platform.startswith("linux"):
         backend = plt.get_backend()
         if backend in ["TkAgg", "Qt5Agg", "QtAgg"]:
             try:
-                mng.full_screen_toggle()  
+                mng.full_screen_toggle()
             except AttributeError:
                 pass
-        elif backend in ["GTK3Agg", "GTK3Cairo"]:  
+        elif backend in ["GTK3Agg", "GTK3Cairo"]:
             try:
                 mng.window.maximize()
             except AttributeError:
                 pass
 
-    elif sys.platform.startswith("win"):  
+    elif sys.platform.startswith("win"):
         try:
-            mng.window.state("zoomed")  
+            mng.window.state("zoomed")
         except AttributeError:
             pass
-        
+
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     # Desenha as arestas do grafo a vermelho
-    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True)
+    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True , width=2)
+
+    # Adiciona rótulos para os custos das arestas
+    edge_labels = {(u, v): f"{d['cost']}" for u, v, d in G.edges(data=True)}
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8, font_color='blue')
 
     # Desenha os rótulos dentro de retângulos coloridos
     for nome, (x, y) in pos.items():
-        label_text = labels.get(nome, nome)  # Usa "1: Nome" ou só "Nome" se não estiver no dicionário
+        label_text = labels.get(nome, nome)
         plt.text(x, y, label_text, fontsize=8, fontweight='bold',
                  bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
                  horizontalalignment='center', verticalalignment='center')
@@ -160,7 +156,6 @@ def draw_network(G, node_mapping, origem, destino):
 
     # Exibe o gráfico
     plt.show()
-
 
 def ask_origin_destiny(node_mapping):
     
@@ -178,7 +173,7 @@ def ask_origin_destiny(node_mapping):
         @param destino: The selected destination node number.
     """
     
-    os.system('cls')
+    clear_screen()
     
     print("\n-------------- Escolha do nó de origem e destino ---------------")
     for num, nome in node_mapping.items():
@@ -198,3 +193,28 @@ def ask_origin_destiny(node_mapping):
             print("\nNúmero inválido. Por favor, escolha um número da lista.")  
     
     return origem, destino
+
+def find_best_path(G, origem, destino):
+    """
+    @brief Finds the best path between two nodes based on the lowest cost.
+
+    This function uses Dijkstra's algorithm to compute the most efficient path between 
+    the source and destination nodes, considering the link costs stored in the graph. 
+    It returns both the computed path and the total cost.
+
+    @param G The directed graph containing nodes and edges with associated costs.
+    @param origem The source node from which the path will be calculated.
+    @param destino The destination node to which the path will be determined.
+
+    @return A tuple (path, cost), where:
+        @param path: Ordered list of nodes representing the shortest path.
+        @param cost: Total cost of the path based on the 'cost' attribute of the edges.
+    """
+    path = nx.shortest_path(G, source=origem, target=destino, weight='cost')
+    print(f"Caminho mais curto: {path}")
+    cost = nx.shortest_path_length(G, source=origem, target=destino, weight='cost')
+    print(f"Custo total: {cost}")
+    return path, cost
+
+def clear_screen():
+    os.system('cls' if os.name == 'nt' else 'clear')

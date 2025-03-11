@@ -1,11 +1,10 @@
-from functions import retrieve_data, draw_network, ask_origin_destiny
-import os
+from functions import retrieve_data, draw_network, ask_origin_destiny, clear_screen, find_best_path
 
 
 networks = ["abilene.txt", "atlanta.txt", "nobel-eu.txt", "nobel-germany.txt"]
 
 while True: 
-    os.system('cls')
+    #clear_screen()
     print(" \n-------------- Redes disponíveis: ---------------")
     for i, ficheiro in enumerate(networks, 1):
         print(f"{i}. {ficheiro}")
@@ -20,6 +19,7 @@ while True:
             network_data = file.read()
             G, node_mapping = retrieve_data(network_data)
             origem, destino = ask_origin_destiny(node_mapping)
+            caminho, custo = find_best_path(G, node_mapping[origem], node_mapping[destino])
             draw_network(G, node_mapping, origem, destino)
         
     elif escolha == 4:
@@ -30,20 +30,21 @@ while True:
                     network_data = file.read()
                     G, node_mapping = retrieve_data(network_data)
                     origem, destino = ask_origin_destiny(node_mapping)
+                    caminho, custo = find_best_path(G, node_mapping[origem], node_mapping[destino])
                     draw_network(G, node_mapping, origem, destino)
             except FileNotFoundError:
-                os.system('cls')
+                clear_screen()
                 print(f"Arquivo '{novo_ficheiro}' não encontrado. Tente novamente.")
         else:
-            os.system('cls')
+            clear_screen()
             print("O nome do arquivo deve terminar com '.txt'. Tente novamente.")
             
     elif escolha == 5:
-        os.system('cls')
+        clear_screen()
         print("Obrigada! Volte Sempre!");
         break
 
     else:
-        os.system('cls')
+        clear_screen()
         print("Número inválido. Por favor, escolha um número da lista.")
         
