@@ -20,7 +20,7 @@ while True:
             G, node_mapping = retrieve_data(network_data)
             origem, destino = ask_origin_destiny(node_mapping)
             caminho, custo = find_best_path(G, node_mapping[origem], node_mapping[destino])
-            draw_network(G, node_mapping, origem, destino)
+            draw_network(G, node_mapping, origem, destino, caminho)
         
     elif escolha == 4:
         novo_ficheiro = input("Digite o nome da rede (com extensão .txt): ")
@@ -31,7 +31,7 @@ while True:
                     G, node_mapping = retrieve_data(network_data)
                     origem, destino = ask_origin_destiny(node_mapping)
                     caminho, custo = find_best_path(G, node_mapping[origem], node_mapping[destino])
-                    draw_network(G, node_mapping, origem, destino)
+                    draw_network(G, node_mapping, origem, destino, caminho)
             except FileNotFoundError:
                 clear_screen()
                 print(f"Arquivo '{novo_ficheiro}' não encontrado. Tente novamente.")
