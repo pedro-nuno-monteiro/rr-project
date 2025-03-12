@@ -80,7 +80,7 @@ def retrieve_data(data):
 
     return G, node_mapping
 
-def draw_network(G, node_mapping, origem, destino):
+def draw_network(G, node_mapping, origem, destino, caminho):
     """
     @brief Draws the network graph using the provided graph data.
 
@@ -137,8 +137,17 @@ def draw_network(G, node_mapping, origem, destino):
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-    # Desenha as arestas do grafo a vermelho
-    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True , width=2)
+    # Criar lista de arestas do caminho mais curto
+    path_edges = list(zip(caminho, caminho[1:]))
+
+    # Desenhar todas as arestas do grafo a vermelho, EXCETO as do caminho mais curto
+    all_edges = list(G.edges)
+    red_edges = [edge for edge in all_edges if edge not in path_edges and (edge[1], edge[0]) not in path_edges]
+    nx.draw_networkx_edges(G, pos, edgelist=red_edges, edge_color='red', arrows=True, width=2, arrowsize=20)
+
+
+    # Destacar as arestas do caminho mais curto a verde
+    nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='green', arrows=True, width=3, arrowsize=20)
 
     # Adiciona rótulos para os custos das arestas
     edge_labels = {(u, v): f"{d['cost']}" for u, v, d in G.edges(data=True)}
