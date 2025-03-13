@@ -109,8 +109,8 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
     # Define as cores dos nós
     node_colors = {
         nome: 'green' if nome == origem_nome else
-              'red' if nome == destino_nome else
-              'lightblue'
+                'red' if nome == destino_nome else
+                'lightblue'
         for nome in G.nodes
     }
 
@@ -159,8 +159,8 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
     for nome, (x, y) in pos.items():
         label_text = labels.get(nome, nome)
         plt.text(x, y, label_text, fontsize=8, fontweight='bold',
-                 bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
-                 horizontalalignment='center', verticalalignment='center')
+                bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
+                horizontalalignment='center', verticalalignment='center')
 
     # Remove a moldura da figura
     plt.box(False)
@@ -231,6 +231,12 @@ def find_best_paths(G, origem, destino):
         - cost2: The total cost of the second path (if available, else None).
     """
 
+    # primeiro - verificar se existe caminho entre nós selecionados
+
+    if not nx.has_path(G, origem, destino):
+        print("Não há caminho entre os nós selecionados.")
+        return None, None, None, None
+
     # Primeiro caminho
     path1 = nx.shortest_path(G, source=origem, target=destino, weight='cost')
     cost1 = nx.shortest_path_length(G, source=origem, target=destino, weight='cost')
@@ -252,15 +258,24 @@ def find_best_paths(G, origem, destino):
         G_copia.remove_node(node)
 
     # Segundo caminho
+
+    if not nx.has_path(G_copia, source=origem, target=destino):
+        print("Não há caminho entre os nós selecionados.")
+        return path1, cost1, None, None
+
     try:
         path2 = nx.shortest_path(G_copia, source=origem, target=destino, weight='cost')
         cost2 = nx.shortest_path_length(G_copia, source=origem, target=destino, weight='cost')
         print(f"Segundo caminho: {path2} (Custo: {cost2})")
     except nx.NetworkXNoPath:
         print("Não há um segundo caminho possível.")
-        path2, cost2 = None, None  # Definir como None para evitar erros
+        path2, cost2 = None, None
 
     return path1, cost1, path2, cost2
 
 def clear_screen():
+    """"
+    "Limpa a tela do terminal."
+    """
+
     os.system('cls' if os.name == 'nt' else 'clear')
