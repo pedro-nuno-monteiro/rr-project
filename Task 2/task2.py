@@ -35,7 +35,8 @@ while True:
     
     elif escolha == 4:
         novo_ficheiro = input("Digite o nome da rede (com extensão .txt): ")
-        if novo_ficheiro.endswith('.txt'):
+        caminho_ficheiro = f"networks/{novo_ficheiro}"
+        if caminho_ficheiro.endswith('.txt'):
             try:
                 with open(novo_ficheiro, 'r') as file:
                     network_data = file.read()
@@ -45,7 +46,7 @@ while True:
                     draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
             except FileNotFoundError:
                 clear_screen()
-                print(f"Arquivo '{novo_ficheiro}' não encontrado. Tente novamente.")
+                print(f"Arquivo '{novo_ficheiro}' não encontrado. O ficheiro tem de estar na pasta networks. Tente novamente.")
         else:
             clear_screen()
             print("O nome do arquivo deve terminar com '.txt'. Tente novamente.")
