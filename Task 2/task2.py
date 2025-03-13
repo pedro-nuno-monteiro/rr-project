@@ -1,4 +1,4 @@
-from functions import retrieve_data, draw_network, ask_origin_destiny, clear_screen, find_best_paths
+from functions import retrieve_data, draw_network, ask_origin_destiny, clear_screen, find_best_paths, draw_empty_network
 
 networks = ["networks/abilene.txt", "networks/atlanta.txt", "networks/nobel-eu.txt", "networks/nobel-germany.txt"]
 
@@ -23,6 +23,9 @@ while True:
             # criação do grafo e mapeamento dos nós
             G, node_mapping = retrieve_data(network_data)
 
+            # Mostrar a rede antes de pedir os nós
+            draw_empty_network(G, node_mapping)
+
             # pedir nó origem e nó destino
             origem, destino = ask_origin_destiny(node_mapping)
 
@@ -40,6 +43,8 @@ while True:
                 with open(novo_ficheiro, 'r') as file:
                     network_data = file.read()
                     G, node_mapping = retrieve_data(network_data)
+                    # Mostrar a rede antes de pedir os nós
+                    draw_empty_network(G, node_mapping)
                     origem, destino = ask_origin_destiny(node_mapping)
                     caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
                     draw_network(G, node_mapping, origem, destino, caminho1, caminho2)

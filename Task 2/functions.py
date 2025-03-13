@@ -115,7 +115,6 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
     }
 
     # Criar figura e ajustar para tela cheia
-    #fig = plt.figure()
     mng = plt.get_current_fig_manager()
 
     if sys.platform.startswith("linux"):
@@ -258,11 +257,6 @@ def find_best_paths(G, origem, destino):
         G_copia.remove_node(node)
 
     # Segundo caminho
-
-    if not nx.has_path(G_copia, source=origem, target=destino):
-        print("Não há caminho entre os nós selecionados.")
-        return path1, cost1, None, None
-
     try:
         path2 = nx.shortest_path(G_copia, source=origem, target=destino, weight='cost')
         cost2 = nx.shortest_path_length(G_copia, source=origem, target=destino, weight='cost')
@@ -279,3 +273,63 @@ def clear_screen():
     """
 
     os.system('cls' if os.name == 'nt' else 'clear')
+
+def draw_empty_network(G, node_mapping):
+    """
+    @brief Draws the network graph using the provided graph data.
+    
+    This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
+    The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
+    as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
+    
+    @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
+    """
+    # Obtém as coordenadas dos nós do grafo
+    pos = nx.get_node_attributes(G, 'pos')
+
+    # Cria rótulos no formato "1: Nome"
+    labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
+
+    # desenha o gráfico, deteta o SO e abre em fullscreen para uma melhor visualização
+    mng = plt.get_current_fig_manager()
+    
+    if sys.platform.startswith("linux"):  
+        backend = plt.get_backend()
+        if backend in ["TkAgg", "Qt5Agg", "QtAgg"]:
+            try:
+                mng.full_screen_toggle()  
+            except AttributeError:
+                pass
+        elif backend in ["GTK3Agg", "GTK3Cairo"]:  
+            try:
+                mng.window.maximize()
+            except AttributeError:
+                pass
+
+    elif sys.platform.startswith("win"):  
+        try:
+            mng.window.state("zoomed")  
+        except AttributeError:
+            pass
+
+
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0) 
+
+    # Desenha as arestas do grafo com cor vermelha e setas para indicar direção
+    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True)
+    
+
+     
+
+    # Desenha os rótulos dentro de retângulos coloridos
+    for nome, (x, y) in pos.items():
+        label_text = labels.get(nome, nome)
+        plt.text(x, y, label_text, fontsize=8, fontweight='bold',
+                bbox=dict(facecolor='lightblue', edgecolor='black', boxstyle='round,pad=0.3'),
+                horizontalalignment='center', verticalalignment='center')
+
+    # Remove a moldura da figura para um visual mais limpo
+    plt.box(False)
+
+    # Exibe o gráfico
+    plt.show(block=False)
