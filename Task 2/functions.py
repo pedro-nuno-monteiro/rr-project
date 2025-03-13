@@ -1,6 +1,8 @@
 import networkx as nx
 import matplotlib.pyplot as plt
 import os, sys
+import matplotlib.lines as mlines
+
 
 def retrieve_data(data):
     
@@ -80,7 +82,7 @@ def retrieve_data(data):
 
     return G, node_mapping
 
-def draw_network(G, node_mapping, origem, destino, caminho):
+def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
     """
     @brief Draws the network graph using the provided graph data.
 
@@ -113,7 +115,7 @@ def draw_network(G, node_mapping, origem, destino, caminho):
     }
 
     # Criar figura e ajustar para tela cheia
-    fig = plt.figure()
+    #fig = plt.figure()
     mng = plt.get_current_fig_manager()
 
     if sys.platform.startswith("linux"):
@@ -137,17 +139,17 @@ def draw_network(G, node_mapping, origem, destino, caminho):
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-    # Criar lista de arestas do caminho mais curto
-    path_edges = list(zip(caminho, caminho[1:]))
+    # Desenha todas as arestas a vermelho
+    nx.draw_networkx_edges(G, pos, edge_color='red', alpha=0.3, width=1)
 
-    # Desenhar todas as arestas do grafo a vermelho, EXCETO as do caminho mais curto
-    all_edges = list(G.edges)
-    red_edges = [edge for edge in all_edges if edge not in path_edges and (edge[1], edge[0]) not in path_edges]
-    nx.draw_networkx_edges(G, pos, edgelist=red_edges, edge_color='red', arrows=True, width=2, arrowsize=20)
+    # Pinta primeiro caminho (verde)
+    path_edges1 = list(zip(caminho1, caminho1[1:]))
+    nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3)
 
-
-    # Destacar as arestas do caminho mais curto a verde
-    nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='green', arrows=True, width=3, arrowsize=20)
+    # Pinta segundo caminho (azul), se existir
+    if caminho2:
+        path_edges2 = list(zip(caminho2, caminho2[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3)
 
     # Adiciona rótulos para os custos das arestas
     edge_labels = {(u, v): f"{d['cost']}" for u, v, d in G.edges(data=True)}
@@ -163,7 +165,14 @@ def draw_network(G, node_mapping, origem, destino, caminho):
     # Remove a moldura da figura
     plt.box(False)
 
-    # Exibe o gráfico
+    # Criar objetos para a legenda
+    legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Primário")
+    legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="Caminho Secundário")
+    legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
+    legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
+
+    # Adicionar legenda
+    plt.legend(handles=[legend_caminho1, legend_caminho2, legend_inicio, legend_fim], loc='upper right')
     plt.show()
 
 def ask_origin_destiny(node_mapping):
@@ -203,27 +212,55 @@ def ask_origin_destiny(node_mapping):
     
     return origem, destino
 
-def find_best_path(G, origem, destino):
+def find_best_paths(G, origem, destino):
     """
-    @brief Finds the best path between two nodes based on the lowest cost.
+    @brief Finds the best two disjoint paths between two nodes based on the lowest cost.
 
-    This function uses Dijkstra's algorithm to compute the most efficient path between 
-    the source and destination nodes, considering the link costs stored in the graph. 
-    It returns both the computed path and the total cost.
+    This function first computes the shortest path between the source and destination nodes.
+    Then, it removes all intermediate nodes and edges involved in the first path (except origem and destino),
+    ensuring the second path is completely disjoint. If no second path exists, it notifies the user.
 
     @param G The directed graph containing nodes and edges with associated costs.
-    @param origem The source node from which the path will be calculated.
-    @param destino The destination node to which the path will be determined.
+    @param origem The source node.
+    @param destino The destination node.
 
-    @return A tuple (path, cost), where:
-        @param path: Ordered list of nodes representing the shortest path.
-        @param cost: Total cost of the path based on the 'cost' attribute of the edges.
+    @return A tuple (path1, cost1, path2, cost2), where:
+        - path1: The first shortest path.
+        - cost1: The total cost of the first path.
+        - path2: The second shortest path (if available, else None).
+        - cost2: The total cost of the second path (if available, else None).
     """
-    path = nx.shortest_path(G, source=origem, target=destino, weight='cost')
-    print(f"Caminho mais curto: {path}")
-    cost = nx.shortest_path_length(G, source=origem, target=destino, weight='cost')
-    print(f"Custo total: {cost}")
-    return path, cost
+
+    # Primeiro caminho
+    path1 = nx.shortest_path(G, source=origem, target=destino, weight='cost')
+    cost1 = nx.shortest_path_length(G, source=origem, target=destino, weight='cost')
+    
+    print(f"Primeiro caminho: {path1} (Custo: {cost1})")
+
+    # Cópia do grafo para podermos remover o primeiro caminho e calcular o segundo
+    G_copia = G.copy()
+
+    # Remoção do primeiro caminho
+    for i in range(len(path1) - 1):
+        if G_copia.has_edge(path1[i], path1[i+1]):
+            G_copia.remove_edge(path1[i], path1[i+1])
+        if G_copia.has_edge(path1[i+1], path1[i]):  
+            G_copia.remove_edge(path1[i+1], path1[i])
+
+    # Remoção dos nós intermediários
+    for node in path1[1:-1]:
+        G_copia.remove_node(node)
+
+    # Segundo caminho
+    try:
+        path2 = nx.shortest_path(G_copia, source=origem, target=destino, weight='cost')
+        cost2 = nx.shortest_path_length(G_copia, source=origem, target=destino, weight='cost')
+        print(f"Segundo caminho: {path2} (Custo: {cost2})")
+    except nx.NetworkXNoPath:
+        print("Não há um segundo caminho possível.")
+        path2, cost2 = None, None  # Definir como None para evitar erros
+
+    return path1, cost1, path2, cost2
 
 def clear_screen():
     os.system('cls' if os.name == 'nt' else 'clear')

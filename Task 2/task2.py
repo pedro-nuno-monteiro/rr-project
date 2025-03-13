@@ -1,4 +1,4 @@
-from functions import retrieve_data, draw_network, ask_origin_destiny, clear_screen, find_best_path
+from functions import retrieve_data, draw_network, ask_origin_destiny, clear_screen, find_best_paths
 
 
 networks = ["abilene.txt", "atlanta.txt", "nobel-eu.txt", "nobel-germany.txt"]
@@ -19,8 +19,8 @@ while True:
             network_data = file.read()
             G, node_mapping = retrieve_data(network_data)
             origem, destino = ask_origin_destiny(node_mapping)
-            caminho, custo = find_best_path(G, node_mapping[origem], node_mapping[destino])
-            draw_network(G, node_mapping, origem, destino, caminho)
+            caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
+            draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
         
     elif escolha == 4:
         novo_ficheiro = input("Digite o nome da rede (com extensão .txt): ")
@@ -30,8 +30,8 @@ while True:
                     network_data = file.read()
                     G, node_mapping = retrieve_data(network_data)
                     origem, destino = ask_origin_destiny(node_mapping)
-                    caminho, custo = find_best_path(G, node_mapping[origem], node_mapping[destino])
-                    draw_network(G, node_mapping, origem, destino, caminho)
+                    caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
+                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
             except FileNotFoundError:
                 clear_screen()
                 print(f"Arquivo '{novo_ficheiro}' não encontrado. Tente novamente.")
