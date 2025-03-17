@@ -2,6 +2,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import sys
 import matplotlib.lines as mlines
+from matplotlib.widgets import CheckButtons
 
 def retrieve_data(data):
     
@@ -80,7 +81,7 @@ def retrieve_data(data):
     return G, node_mapping
 
 # ------------------------------------------------------
-def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
+def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3, algoritmo):
     """!
     @brief Desenha o grafo da rede, usando os dados fornecidos.
 
@@ -148,6 +149,10 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
     if caminho2:
         path_edges2 = list(zip(caminho2, caminho2[1:]))
         nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3)
+        
+    if caminho3:
+        path_edges3 = list(zip(caminho3, caminho3[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, edge_color='magenta', width=3)
 
     # Adiciona rótulos para os custos das arestas
     edge_labels = {(u, v): f"{d['cost']}" for u, v, d in G.edges(data=True)}
@@ -164,13 +169,21 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
     plt.box(False)
 
     # Criar objetos para a legenda
-    legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Primário")
-    legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="Caminho Secundário")
+    legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto")
     legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
     legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
+    legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach")
+    legend_caminho3 = mlines.Line2D([], [], color='magenta', linewidth=3, label="Suurbale")
+    
+    if algoritmo == 1:
+        plt.legend(handles=[legend_caminho1, legend_caminho2, legend_inicio, legend_fim], loc='upper right')
+    if algoritmo == 2:
+        plt.legend(handles=[legend_caminho1, legend_caminho3, legend_inicio, legend_fim], loc='upper right')
+    if algoritmo == 3:
+        plt.legend(handles=[legend_caminho1, legend_caminho2, legend_caminho3, legend_inicio, legend_fim], loc='upper right')
 
+   
     # Adicionar legenda
-    plt.legend(handles=[legend_caminho1, legend_caminho2, legend_inicio, legend_fim], loc='upper right')
     plt.show()
 
 # ------------------------------------------------------
@@ -300,15 +313,15 @@ def suurbale(G, origem, destino):
     transformed_graph = nx.DiGraph()
 
     for u, v, data in G.edges(data=True):
-        print("u, v, data", u, v, data)
+        #print("u, v, data", u, v, data)
         c_ij = data.get('cost', 1)
-        print("c_ij: ", c_ij)
+        #print("c_ij: ", c_ij)
         t_s_i = distance[u] if u in distance else float('inf')
-        print("t_s_i: ", t_s_i)
+        #print("t_s_i: ", t_s_i)
         t_s_j = distance[v] if v in distance else float('inf')
-        print("t_s_j: ", t_s_j)
+        #print("t_s_j: ", t_s_j)
         c_prime = c_ij + t_s_i - t_s_j
-        print("c_prime: ", c_prime)
+        #print("c_prime: ", c_prime)
         transformed_graph.add_edge(u, v, weight=c_prime)
 
     # step 2.2: remove all the arcs on the shortest path that are towards the source
@@ -323,10 +336,14 @@ def suurbale(G, origem, destino):
         transformed_graph.add_edge(v, u, weight=0)
 
     # step 3. find a new minimum-cost path from s to d in the changed network
-    new_path = nx.shortest_path(transformed_graph, origem, destino, weight='weight')
-    new_cost = nx.shortest_path_length(transformed_graph, origem, destino, weight='weight')
-    print(f"New shortest path from {origem} to {destino} in the transformed graph: {new_path} with cost {new_cost}")
-
+    try:
+        new_path = nx.shortest_path(transformed_graph, origem, destino, weight='weight')
+        new_cost = nx.shortest_path_length(transformed_graph, origem, destino, weight='weight')
+    except nx.NetworkXNoPath:
+        print(f"\n[AVISO] Não há caminho alternativo disponível de {origem} para {destino} após transformação pelo método Suurbale.")
+        return path, None
+    
+    
     # step 4. remove the common arcs with opposite directions in the computed paths. 
     # the remaining arcs form two minimum-cost disjoint paths.
     combined_path = path + new_path[1:]  # Merge the two paths

@@ -33,7 +33,16 @@ while True:
     
     escolha = int(input("Digite o número da rede que deseja analisar: ")) - 1
     
-    if 0 <= escolha < len(networks):
+    if 0 <= escolha < len(networks) or escolha == 4:
+        
+        if escolha == 4:
+            novo_ficheiro = ask_network()
+            if novo_ficheiro == "":
+                continue
+            else:
+                networks.append(novo_ficheiro)
+                escolha = len(networks) - 1
+        
         with open(networks[escolha], 'r') as file:
 
             """!
@@ -91,37 +100,32 @@ while True:
                 @param node_mapping Mapa dos nós.
                 @param origem Nó de origem.
                 @param destino Nó de destino.
-                @param caminho1 Primeiro caminho encontrado.
-                @param caminho2 Segundo caminho encontrado.
+                @param caminho1 Caminho mais curto.
+                @param caminho2 Caminho Two Step Approach.
+                @param caminho3 Caminho Suurbale.
                 """
                 # desenhar o grafo
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=None, algoritmo=algoritmo)
 
-            else: 
-                caminho1, caminho2 = suurbale(G, node_mapping[origem], node_mapping[destino])
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
+            if algoritmo == 2: 
+                caminho1, caminho3 = suurbale(G, node_mapping[origem], node_mapping[destino])
+                if caminho3 == None:
+                    print("Não foi possível encontrar caminho disjunto.")
+                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2=None, caminho3=None, algoritmo=algoritmo)
+                else:
+                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2=None, caminho3=caminho3, algoritmo=algoritmo)
+                
+            if algoritmo == 3:
+                caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
+                caminho1, caminho3 = suurbale(G, node_mapping[origem], node_mapping[destino])
+                if caminho3 == None:
+                    print("Não foi possível encontrar caminho disjunto.")
+                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=None, algoritmo=algoritmo)
+                else:
+                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=caminho3, algoritmo=algoritmo)
+                
     
     
-    elif escolha == 4:
-        novo_ficheiro = input("Digite o nome da rede (com extensão .txt): ")
-        caminho_ficheiro = f"networks/{novo_ficheiro}"
-        if caminho_ficheiro.endswith('.txt'):
-            try:
-                with open(caminho_ficheiro, 'r') as file:
-                    network_data = file.read()
-                    G, node_mapping = retrieve_data(network_data)
-                    # Mostrar a rede antes de pedir os nós
-                    draw_empty_network(G, node_mapping)
-                    origem, destino = ask_origin_destiny(node_mapping)
-                    caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
-                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
-            except FileNotFoundError:
-                clear_screen()
-                print(f"Arquivo '{novo_ficheiro}' não encontrado. O ficheiro tem de estar na pasta networks. Tente novamente.")
-        else:
-            clear_screen()
-            print("O nome do arquivo deve terminar com '.txt'. Tente novamente.")
-            
     elif escolha == 5:
         clear_screen()
         print("Obrigada! Volte Sempre!");
