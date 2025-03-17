@@ -1,4 +1,5 @@
 from functions import *
+from menus import *
 
 """!
 @file task2.py
@@ -67,30 +68,38 @@ while True:
             # pedir nó origem e nó destino
             origem, destino = ask_origin_destiny(node_mapping)
 
-            """!
-            @brief Encontra os caminhos mais curtos entre os nós escolhidos.
-            @param G Grafo da rede.
-            @param origem Nó de origem.
-            @param destino Nó de destino.
-            @return caminho1 Primeiro caminho encontrado.
-            @return custo1 Custo do primeiro caminho.
-            @return caminho2 Segundo caminho encontrado.
-            @return custo2 Custo do segundo caminho.
-            """
-            # encontrar os caminhos mais curtos
-            caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
+            algoritmo = ask_which_algorithm()
 
-            """!
-            @brief Desenha o grafo com os caminhos encontrados.
-            @param G Grafo da rede.
-            @param node_mapping Mapa dos nós.
-            @param origem Nó de origem.
-            @param destino Nó de destino.
-            @param caminho1 Primeiro caminho encontrado.
-            @param caminho2 Segundo caminho encontrado.
-            """
-            # desenhar o grafo
-            draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
+            if algoritmo == 1:
+
+                """!
+                @brief Encontra os caminhos mais curtos entre os nós escolhidos.
+                @param G Grafo da rede.
+                @param origem Nó de origem.
+                @param destino Nó de destino.
+                @return caminho1 Primeiro caminho encontrado.
+                @return custo1 Custo do primeiro caminho.
+                @return caminho2 Segundo caminho encontrado.
+                @return custo2 Custo do segundo caminho.
+                """
+                # encontrar os caminhos mais curtos
+                caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
+
+                """!
+                @brief Desenha o grafo com os caminhos encontrados.
+                @param G Grafo da rede.
+                @param node_mapping Mapa dos nós.
+                @param origem Nó de origem.
+                @param destino Nó de destino.
+                @param caminho1 Primeiro caminho encontrado.
+                @param caminho2 Segundo caminho encontrado.
+                """
+                # desenhar o grafo
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
+
+            else: 
+                caminho1, caminho2 = suurbale(G, node_mapping[origem], node_mapping[destino])
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
     
     
     elif escolha == 4:
@@ -98,7 +107,7 @@ while True:
         caminho_ficheiro = f"networks/{novo_ficheiro}"
         if caminho_ficheiro.endswith('.txt'):
             try:
-                with open(novo_ficheiro, 'r') as file:
+                with open(caminho_ficheiro, 'r') as file:
                     network_data = file.read()
                     G, node_mapping = retrieve_data(network_data)
                     # Mostrar a rede antes de pedir os nós
