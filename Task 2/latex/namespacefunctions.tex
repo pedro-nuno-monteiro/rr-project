@@ -1,0 +1,149 @@
+\doxysection{functions Namespace Reference}
+\hypertarget{namespacefunctions}{}\label{namespacefunctions}\index{functions@{functions}}
+\doxysubsubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+\mbox{\hyperlink{namespacefunctions_a4e0f74e73d1212131abe6b9572fae2f0}{retrieve\+\_\+data}} (data)
+\begin{DoxyCompactList}\small\item\em Processa os dados de entrada, para criar um grafo direcionado. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacefunctions_a9d23af489ff25e73b6f036b723580425}{draw\+\_\+network}} (G, node\+\_\+mapping, origem, destino, caminho1, caminho2)
+\begin{DoxyCompactList}\small\item\em Desenha o grafo da rede, usando os dados fornecidos. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacefunctions_abe095c50c5379a8ed7a1b6ace217b0cc}{ask\+\_\+origin\+\_\+destiny}} (node\+\_\+mapping)
+\begin{DoxyCompactList}\small\item\em Solicita ao user os nós de origem e destino. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacefunctions_ad3fc1f7c5e81de50bcde372d5c99f642}{find\+\_\+best\+\_\+paths}} (G, origem, destino)
+\begin{DoxyCompactList}\small\item\em Encontra os dois melhores caminhos disjuntos entre os dois nós com base no menor custo. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacefunctions_a6b8caadfc061dc7dd1d31a23d94a985c}{clear\+\_\+screen}} ()
+\begin{DoxyCompactList}\small\item\em Limpa a tela do terminal. \end{DoxyCompactList}\item 
+\mbox{\hyperlink{namespacefunctions_a4ea169542fb9831cccf64340407bbf39}{draw\+\_\+empty\+\_\+network}} (G, node\+\_\+mapping)
+\begin{DoxyCompactList}\small\item\em Desenha o grafo da rede, sem qualquer escolha. \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\doxysubsection{Function Documentation}
+\Hypertarget{namespacefunctions_abe095c50c5379a8ed7a1b6ace217b0cc}\index{functions@{functions}!ask\_origin\_destiny@{ask\_origin\_destiny}}
+\index{ask\_origin\_destiny@{ask\_origin\_destiny}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{ask\_origin\_destiny()}{ask\_origin\_destiny()}}
+{\footnotesize\ttfamily \label{namespacefunctions_abe095c50c5379a8ed7a1b6ace217b0cc} 
+functions.\+ask\+\_\+origin\+\_\+destiny (\begin{DoxyParamCaption}\item[{}]{node\+\_\+mapping}{}\end{DoxyParamCaption})}
+
+
+
+Solicita ao user os nós de origem e destino. 
+
+Esta função solicita ao user os números correspondentes aos nós de origem e de destino.
+
+
+\begin{DoxyParams}{Parameters}
+{\em node\+\_\+mapping} & Mapa de nós.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Tuple (origem, destino) onde\+: 
+\end{DoxyReturn}
+
+\begin{DoxyParams}{Parameters}
+{\em origem} & O número do nó de origem selecionado. \\
+\hline
+{\em destino} & O número do nó de destino selecionado. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{namespacefunctions_a6b8caadfc061dc7dd1d31a23d94a985c}\index{functions@{functions}!clear\_screen@{clear\_screen}}
+\index{clear\_screen@{clear\_screen}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{clear\_screen()}{clear\_screen()}}
+{\footnotesize\ttfamily \label{namespacefunctions_a6b8caadfc061dc7dd1d31a23d94a985c} 
+functions.\+clear\+\_\+screen (\begin{DoxyParamCaption}{}{}\end{DoxyParamCaption})}
+
+
+
+Limpa a tela do terminal. 
+
+"{} \Hypertarget{namespacefunctions_a4ea169542fb9831cccf64340407bbf39}\index{functions@{functions}!draw\_empty\_network@{draw\_empty\_network}}
+\index{draw\_empty\_network@{draw\_empty\_network}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{draw\_empty\_network()}{draw\_empty\_network()}}
+{\footnotesize\ttfamily \label{namespacefunctions_a4ea169542fb9831cccf64340407bbf39} 
+functions.\+draw\+\_\+empty\+\_\+network (\begin{DoxyParamCaption}\item[{}]{G}{, }\item[{}]{node\+\_\+mapping}{}\end{DoxyParamCaption})}
+
+
+
+Desenha o grafo da rede, sem qualquer escolha. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em G} & O grafo direcionado. \\
+\hline
+{\em node\+\_\+mapping} & Mapa dos nós. \\
+\hline
+\end{DoxyParams}
+\Hypertarget{namespacefunctions_a9d23af489ff25e73b6f036b723580425}\index{functions@{functions}!draw\_network@{draw\_network}}
+\index{draw\_network@{draw\_network}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{draw\_network()}{draw\_network()}}
+{\footnotesize\ttfamily \label{namespacefunctions_a9d23af489ff25e73b6f036b723580425} 
+functions.\+draw\+\_\+network (\begin{DoxyParamCaption}\item[{}]{G}{, }\item[{}]{node\+\_\+mapping}{, }\item[{}]{origem}{, }\item[{}]{destino}{, }\item[{}]{caminho1}{, }\item[{}]{caminho2}{}\end{DoxyParamCaption})}
+
+
+
+Desenha o grafo da rede, usando os dados fornecidos. 
+
+
+\begin{DoxyParams}{Parameters}
+{\em G} & O grafo direcionado a ser desenhado. \\
+\hline
+{\em node\+\_\+mapping} & Mapa de nós. \\
+\hline
+{\em origem} & Índice do nó de origem. \\
+\hline
+{\em destino} & Índice do nó de destino. \\
+\hline
+{\em caminho1} & Lista de nós que representam o primeiro caminho. \\
+\hline
+{\em caminho2} & Lista de nós que representam o segundo caminho (pode ser None). \\
+\hline
+\end{DoxyParams}
+\Hypertarget{namespacefunctions_ad3fc1f7c5e81de50bcde372d5c99f642}\index{functions@{functions}!find\_best\_paths@{find\_best\_paths}}
+\index{find\_best\_paths@{find\_best\_paths}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{find\_best\_paths()}{find\_best\_paths()}}
+{\footnotesize\ttfamily \label{namespacefunctions_ad3fc1f7c5e81de50bcde372d5c99f642} 
+functions.\+find\+\_\+best\+\_\+paths (\begin{DoxyParamCaption}\item[{}]{G}{, }\item[{}]{origem}{, }\item[{}]{destino}{}\end{DoxyParamCaption})}
+
+
+
+Encontra os dois melhores caminhos disjuntos entre os dois nós com base no menor custo. 
+
+Esta função primeiro calcula o caminho mais curto entre os nós de origem e destino. Em seguida, remove todos os nós e arestas intermediários envolvidos no primeiro caminho, garantindo que o segundo caminho seja completamente disjunto. Se não existir um segundo caminho, notifica o usuário.
+
+
+\begin{DoxyParams}{Parameters}
+{\em G} & O grafo direcionado. \\
+\hline
+{\em origem} & O nó de origem. \\
+\hline
+{\em destino} & O nó de destino.\\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Tuple (path1, cost1, path2, cost2), onde\+:
+\begin{DoxyItemize}
+\item path1\+: O primeiro caminho mais curto.
+\item cost1\+: O custo total do primeiro caminho.
+\item path2\+: O segundo caminho mais curto (caso contrário, None).
+\item cost2\+: O custo total do segundo caminho (caso contrário, None). 
+\end{DoxyItemize}
+\end{DoxyReturn}
+\Hypertarget{namespacefunctions_a4e0f74e73d1212131abe6b9572fae2f0}\index{functions@{functions}!retrieve\_data@{retrieve\_data}}
+\index{retrieve\_data@{retrieve\_data}!functions@{functions}}
+\doxysubsubsection{\texorpdfstring{retrieve\_data()}{retrieve\_data()}}
+{\footnotesize\ttfamily \label{namespacefunctions_a4e0f74e73d1212131abe6b9572fae2f0} 
+functions.\+retrieve\+\_\+data (\begin{DoxyParamCaption}\item[{}]{data}{}\end{DoxyParamCaption})}
+
+
+
+Processa os dados de entrada, para criar um grafo direcionado. 
+
+Esta função extrai informações de nós e links dos dados de entrada fornecidos pelo ficheiro de entrada. Cria um grafo direcionado, onde cada nó é adicionado com suas coordenadas e cada link é estabelecido.
+
+
+\begin{DoxyParams}{Parameters}
+{\em data} & A string de entrada contém os dados a serem analisados. Deve conter seções para nós e links. \\
+\hline
+\end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+Um grafo direcionado, onde os nós são conectados por links conforme o ficheiro de entrada. 
+\end{DoxyReturn}

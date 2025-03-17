@@ -6,18 +6,16 @@ import matplotlib.lines as mlines
 
 def retrieve_data(data):
     
-    """
-    @brief Processes input data to create a directed graph.
+    """!
+    @brief Processa os dados de entrada, para criar um grafo direcionado.
     
-    This function extracts node and link information from the input data provided in the `data` string.
-    It creates a directed graph where each node is added with its coordinates and each link is established
-    between the appropriate nodes. It removes unnecessary lines and comments, and processes sections
-    specifically for nodes and links.
+    Esta função extrai informações de nós e links dos dados de entrada fornecidos pelo ficheiro de entrada.
+    Cria um grafo direcionado, onde cada nó é adicionado com suas coordenadas e cada link é estabelecido. 
 
-    @param data The input string containing the data to be parsed. It should contain sections for nodes and links.
-    @return A directed graph (DiGraph) where nodes are connected by links as specified in the input data.
+    @param data A string de entrada contém os dados a serem analisados. Deve conter seções para nós e links.
+    @return Um grafo direcionado, onde os nós são conectados por links conforme o ficheiro de entrada.
     """
-    
+
     # cria um grafo direcionado
     G = nx.DiGraph()
     
@@ -83,14 +81,15 @@ def retrieve_data(data):
     return G, node_mapping
 
 def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
-    """
-    @brief Draws the network graph using the provided graph data.
+    """!
+    @brief Desenha o grafo da rede, usando os dados fornecidos.
 
-    This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
-    The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
-    as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
-
-    @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
+    @param G O grafo direcionado a ser desenhado.
+    @param node_mapping Mapa de nós.
+    @param origem Índice do nó de origem.
+    @param destino Índice do nó de destino.
+    @param caminho1 Lista de nós que representam o primeiro caminho.
+    @param caminho2 Lista de nós que representam o segundo caminho (pode ser None).
     """
 
     # Obtém as coordenadas dos nós do grafo
@@ -176,18 +175,17 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2):
 
 def ask_origin_destiny(node_mapping):
     
-    """
-    @brief Asks the user to select the origin and destination nodes.
+    """!
+    @brief Solicita ao user os nós de origem e destino.
 
-    This function prompts the user to input the numbers corresponding to the origin and 
-    destination nodes. It ensures that the input is valid, checking against the provided 
-    node mapping.
+    Esta função solicita ao user os números correspondentes aos nós de origem e de 
+    destino.
 
-    @param node_mapping Dictionary mapping node numbers to their names.
+    @param node_mapping Mapa de nós.
 
-    @return A tuple (origem, destino) where:
-        @param origem: The selected origin node number.
-        @param destino: The selected destination node number.
+    @return Tuple (origem, destino) onde:
+        @param origem: O número do nó de origem selecionado.
+        @param destino: O número do nó de destino selecionado.
     """
     
     clear_screen()
@@ -212,22 +210,22 @@ def ask_origin_destiny(node_mapping):
     return origem, destino
 
 def find_best_paths(G, origem, destino):
-    """
-    @brief Finds the best two disjoint paths between two nodes based on the lowest cost.
+    """!
+    @brief Encontra os dois melhores caminhos disjuntos entre os dois nós com base no menor custo.
 
-    This function first computes the shortest path between the source and destination nodes.
-    Then, it removes all intermediate nodes and edges involved in the first path (except origem and destino),
-    ensuring the second path is completely disjoint. If no second path exists, it notifies the user.
+    Esta função primeiro calcula o caminho mais curto entre os nós de origem e destino.
+    Em seguida, remove todos os nós e arestas intermediários envolvidos no primeiro caminho,
+    garantindo que o segundo caminho seja completamente disjunto. Se não existir um segundo caminho, notifica o usuário.
 
-    @param G The directed graph containing nodes and edges with associated costs.
-    @param origem The source node.
-    @param destino The destination node.
+    @param G O grafo direcionado.
+    @param origem O nó de origem.
+    @param destino O nó de destino.
 
-    @return A tuple (path1, cost1, path2, cost2), where:
-        - path1: The first shortest path.
-        - cost1: The total cost of the first path.
-        - path2: The second shortest path (if available, else None).
-        - cost2: The total cost of the second path (if available, else None).
+    @return Tuple (path1, cost1, path2, cost2), onde:
+        - path1: O primeiro caminho mais curto.
+        - cost1: O custo total do primeiro caminho.
+        - path2: O segundo caminho mais curto (caso contrário, None).
+        - cost2: O custo total do segundo caminho (caso contrário, None).
     """
 
     # primeiro - verificar se existe caminho entre nós selecionados
@@ -268,21 +266,18 @@ def find_best_paths(G, origem, destino):
     return path1, cost1, path2, cost2
 
 def clear_screen():
-    """"
-    "Limpa a tela do terminal."
+    """!
+    @brief Limpa a tela do terminal.
     """
 
     os.system('cls' if os.name == 'nt' else 'clear')
 
 def draw_empty_network(G, node_mapping):
-    """
-    @brief Draws the network graph using the provided graph data.
+    """!
+    @brief Desenha o grafo da rede, sem qualquer escolha.
     
-    This function visualizes the graph `G` by using the positions of nodes stored as attributes in the graph.
-    The network is drawn using `matplotlib` and `networkx`, with nodes displayed as light blue circles, and edges
-    as red lines. The plot includes labels for the nodes and arrows to indicate the direction of edges.
-    
-    @param G The directed graph (DiGraph) to be drawn. It must contain node positions as attributes.
+    @param G O grafo direcionado.
+    @param node_mapping Mapa dos nós.
     """
     # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
@@ -318,9 +313,6 @@ def draw_empty_network(G, node_mapping):
     # Desenha as arestas do grafo com cor vermelha e setas para indicar direção
     nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True)
     
-
-     
-
     # Desenha os rótulos dentro de retângulos coloridos
     for nome, (x, y) in pos.items():
         label_text = labels.get(nome, nome)
