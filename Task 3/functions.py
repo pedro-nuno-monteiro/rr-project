@@ -288,10 +288,58 @@ def draw_empty_network(G, node_mapping):
 # ------------------------------------------------------
 def suurbale(G, origem, destino):
     
-    # step 1: find the shortest path in the original graph
-    path1 = nx.shortest_path(G, source=origem, target=destino, weight='cost')
-    cost1 = nx.shortest_path_length(G, source=origem, target=destino, weight='cost')
+    # step 1: find the minimum cost path tree from source s to all other nodes
+    path = nx.shortest_path(G, origem, destino, weight='cost')
+    cost = nx.shortest_path_length(G, origem, destino, weight='cost')
+    #print(f"Shortest path from {origem} to {destino}: {path} with cost {cost}")
 
-    # Step 2: Update graph weights by subtracting the shortest path length
+    # step 2: transform the network, by
 
-    return path1
+    # step 2.1: compute the reduced costs for all network arcs, as c'(i, j) = c(i, j) + t(s, i) - t(s, j)
+    distance = nx.single_source_dijkstra_path_length(G, origem, weight='cost')
+    transformed_graph = nx.DiGraph()
+
+    for u, v, data in G.edges(data=True):
+        print("u, v, data", u, v, data)
+        c_ij = data.get('cost', 1)
+        print("c_ij: ", c_ij)
+        t_s_i = distance[u] if u in distance else float('inf')
+        print("t_s_i: ", t_s_i)
+        t_s_j = distance[v] if v in distance else float('inf')
+        print("t_s_j: ", t_s_j)
+        c_prime = c_ij + t_s_i - t_s_j
+        print("c_prime: ", c_prime)
+        transformed_graph.add_edge(u, v, weight=c_prime)
+
+    # step 2.2: remove all the arcs on the shortest path that are towards the source
+    for i in range(len(path) - 1):
+        u, v = path[i], path[i + 1]
+        if transformed_graph.has_edge(u, v):
+            transformed_graph.remove_edge(u, v)
+
+    # step 2.3: reverse the direction for the arcs on the shortest path (all of null cost)
+    for i in range(len(path) - 1):
+        u, v = path[i], path[i + 1]
+        transformed_graph.add_edge(v, u, weight=0)
+
+    # step 3. find a new minimum-cost path from s to d in the changed network
+    new_path = nx.shortest_path(transformed_graph, origem, destino, weight='weight')
+    new_cost = nx.shortest_path_length(transformed_graph, origem, destino, weight='weight')
+    print(f"New shortest path from {origem} to {destino} in the transformed graph: {new_path} with cost {new_cost}")
+
+    # step 4. remove the common arcs with opposite directions in the computed paths. 
+    # the remaining arcs form two minimum-cost disjoint paths.
+    combined_path = path + new_path[1:]  # Merge the two paths
+    disjoint_paths = []
+    visited_edges = set()
+
+    for i in range(len(combined_path) - 1):
+        u, v = combined_path[i], combined_path[i + 1]
+        if (v, u) not in visited_edges:
+            visited_edges.add((u, v))
+            disjoint_paths.append((u, v))
+
+    print(f"Combined path: {path} and {new_path}")
+    print(f"Disjoint paths: {disjoint_paths}")
+
+    return path, new_path
