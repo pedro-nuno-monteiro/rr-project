@@ -21,7 +21,7 @@ while True:
     @details Exibe o menu e mostra a opção escolhida pelo user.
     """
 
-    clear_screen()
+    #clear_screen()
     print(" \n-------------- Redes disponíveis: ---------------")
     for i, ficheiro in enumerate(networks, 1):
         display_name = ficheiro.replace('networks/', '')
@@ -96,9 +96,11 @@ while True:
     elif escolha == 4:
         novo_ficheiro = input("Digite o nome da rede (com extensão .txt): ")
         caminho_ficheiro = f"networks/{novo_ficheiro}"
+        
         if caminho_ficheiro.endswith('.txt'):
             try:
-                with open(novo_ficheiro, 'r') as file:
+                with open(caminho_ficheiro, 'r') as file:
+                    print(f"Rede '{novo_ficheiro}' carregada com sucesso.")
                     network_data = file.read()
                     G, node_mapping = retrieve_data(network_data)
                     # Mostrar a rede antes de pedir os nós
