@@ -1,5 +1,6 @@
 from functions import *
 from menus import *
+from draw import *
 
 """!
 @file task2.py
@@ -66,7 +67,7 @@ while True:
             @param node_mapping Mapa dos nós.
             """
             # Mostrar a rede antes de pedir os nós, para o user poder escolher
-            draw_empty_network(G, node_mapping)
+            #draw_empty_network(G, node_mapping)
 
             """!
             @brief Solicita os nós de origem e destino ao user.
@@ -108,12 +109,14 @@ while True:
                 draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=None, algoritmo=algoritmo)
 
             if algoritmo == 2: 
-                caminho1, caminho3 = suurbale(G, node_mapping[origem], node_mapping[destino])
+                caminho1, caminho3, grafo_residual = suurbale(G, node_mapping[origem], node_mapping[destino])
+
                 if caminho3 == None:
                     print("Não foi possível encontrar caminho disjunto.")
-                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2=None, caminho3=None, algoritmo=algoritmo)
+                    draw_network(grafo_residual, node_mapping, origem, destino, caminho1, caminho2=None, caminho3=None, algoritmo=algoritmo)
+                
                 else:
-                    draw_network(G, node_mapping, origem, destino, caminho1, caminho2=None, caminho3=caminho3, algoritmo=algoritmo)
+                    draw_suurbale_graph(grafo_residual, node_mapping, origem, destino, caminho1, caminho2=None, caminho3=caminho3)
                 
             if algoritmo == 3:
                 caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])

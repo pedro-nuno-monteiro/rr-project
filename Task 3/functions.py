@@ -1,8 +1,5 @@
 import networkx as nx
 import matplotlib.pyplot as plt
-import sys
-import matplotlib.lines as mlines
-from matplotlib.widgets import CheckButtons
 
 def retrieve_data(data):
     
@@ -81,112 +78,6 @@ def retrieve_data(data):
     return G, node_mapping
 
 # ------------------------------------------------------
-def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3, algoritmo):
-    """!
-    @brief Desenha o grafo da rede, usando os dados fornecidos.
-
-    @param G O grafo direcionado a ser desenhado.
-    @param node_mapping Mapa de nós.
-    @param origem Índice do nó de origem.
-    @param destino Índice do nó de destino.
-    @param caminho1 Lista de nós que representam o primeiro caminho.
-    @param caminho2 Lista de nós que representam o segundo caminho (pode ser None).
-    """
-
-    # Obtém as coordenadas dos nós do grafo
-    pos = nx.get_node_attributes(G, 'pos')
-
-    # Cria rótulos no formato "1: Nome"
-    labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
-
-    # Verifica se origem e destino existem
-    origem_nome = node_mapping.get(origem, None)
-    destino_nome = node_mapping.get(destino, None)
-
-    if origem_nome is None or destino_nome is None:
-        raise ValueError(f"Os nós origem ({origem}) ou destino ({destino}) não estão no mapeamento.")
-
-    # Define as cores dos nós
-    node_colors = {
-        nome: 'green' if nome == origem_nome else
-                'red' if nome == destino_nome else
-                'lightblue'
-        for nome in G.nodes
-    }
-
-    # Criar figura e ajustar para tela cheia
-    mng = plt.get_current_fig_manager()
-
-    if sys.platform.startswith("linux"):
-        backend = plt.get_backend()
-        if backend in ["TkAgg", "Qt5Agg", "QtAgg"]:
-            try:
-                mng.full_screen_toggle()
-            except AttributeError:
-                pass
-        elif backend in ["GTK3Agg", "GTK3Cairo"]:
-            try:
-                mng.window.maximize()
-            except AttributeError:
-                pass
-
-    #elif sys.platform.startswith("win"):
-    #    try:
-    #        mng.window.state("zoomed")
-    #    except AttributeError:
-    #        pass
-
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
-
-    # Desenha todas as arestas a vermelho
-    nx.draw_networkx_edges(G, pos, edge_color='red', alpha=0.3, width=1)
-
-    # Pinta primeiro caminho (verde)
-    path_edges1 = list(zip(caminho1, caminho1[1:]))
-    nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3)
-
-    # Pinta segundo caminho (azul), se existir
-    if caminho2:
-        path_edges2 = list(zip(caminho2, caminho2[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3)
-        
-    if caminho3:
-        path_edges3 = list(zip(caminho3, caminho3[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, edge_color='magenta', width=3)
-
-    # Adiciona rótulos para os custos das arestas
-    edge_labels = {(u, v): f"{d['cost']}" for u, v, d in G.edges(data=True)}
-    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8, font_color='blue')
-
-    # Desenha os rótulos dentro de retângulos coloridos
-    for nome, (x, y) in pos.items():
-        label_text = labels.get(nome, nome)
-        plt.text(x, y, label_text, fontsize=8, fontweight='bold',
-                bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
-                horizontalalignment='center', verticalalignment='center')
-
-    # Remove a moldura da figura
-    plt.box(False)
-
-    # Criar objetos para a legenda
-    legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto")
-    legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
-    legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
-    legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach")
-    legend_caminho3 = mlines.Line2D([], [], color='magenta', linewidth=3, label="Suurbale")
-    
-    if algoritmo == 1:
-        plt.legend(handles=[legend_caminho1, legend_caminho2, legend_inicio, legend_fim], loc='upper right')
-    if algoritmo == 2:
-        plt.legend(handles=[legend_caminho1, legend_caminho3, legend_inicio, legend_fim], loc='upper right')
-    if algoritmo == 3:
-        plt.legend(handles=[legend_caminho1, legend_caminho2, legend_caminho3, legend_inicio, legend_fim], loc='upper right')
-
-   
-    # Adicionar legenda
-    plt.show()
-
-# ------------------------------------------------------
 def find_best_paths(G, origem, destino):
     """!
     @brief Encontra os dois melhores caminhos disjuntos entre os dois nós com base no menor custo.
@@ -244,61 +135,6 @@ def find_best_paths(G, origem, destino):
     return path1, cost1, path2, cost2
 
 # ------------------------------------------------------
-def draw_empty_network(G, node_mapping):
-    """!
-    @brief Desenha o grafo da rede, sem qualquer escolha.
-    
-    @param G O grafo direcionado.
-    @param node_mapping Mapa dos nós.
-    """
-    # Obtém as coordenadas dos nós do grafo
-    pos = nx.get_node_attributes(G, 'pos')
-
-    # Cria rótulos no formato "1: Nome"
-    labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
-
-    # desenha o gráfico, deteta o SO e abre em fullscreen para uma melhor visualização
-    mng = plt.get_current_fig_manager()
-    
-    if sys.platform.startswith("linux"):  
-        backend = plt.get_backend()
-        if backend in ["TkAgg", "Qt5Agg", "QtAgg"]:
-            try:
-                mng.full_screen_toggle()  
-            except AttributeError:
-                pass
-        elif backend in ["GTK3Agg", "GTK3Cairo"]:  
-            try:
-                mng.window.maximize()
-            except AttributeError:
-                pass
-
-    #elif sys.platform.startswith("win"):  
-    #    try:
-    #        mng.window.state("zoomed")  
-    #    except AttributeError:
-    #        pass
-
-
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0) 
-
-    # Desenha as arestas do grafo com cor vermelha e setas para indicar direção
-    nx.draw_networkx_edges(G, pos, edge_color='red', arrows=True)
-    
-    # Desenha os rótulos dentro de retângulos coloridos
-    for nome, (x, y) in pos.items():
-        label_text = labels.get(nome, nome)
-        plt.text(x, y, label_text, fontsize=8, fontweight='bold',
-                bbox=dict(facecolor='lightblue', edgecolor='black', boxstyle='round,pad=0.3'),
-                horizontalalignment='center', verticalalignment='center')
-
-    # Remove a moldura da figura para um visual mais limpo
-    plt.box(False)
-
-    # Exibe o gráfico
-    plt.show(block=False)
-
-# ------------------------------------------------------
 def suurbale(G, origem, destino):
     
     # step 1: find the minimum cost path tree from source s to all other nodes
@@ -310,35 +146,37 @@ def suurbale(G, origem, destino):
 
     # step 2.1: compute the reduced costs for all network arcs, as c'(i, j) = c(i, j) + t(s, i) - t(s, j)
     distance = nx.single_source_dijkstra_path_length(G, origem, weight='cost')
-    transformed_graph = nx.DiGraph()
+    grafo_residual = G.copy()
 
     for u, v, data in G.edges(data=True):
-        #print("u, v, data", u, v, data)
+
         c_ij = data.get('cost', 1)
-        #print("c_ij: ", c_ij)
         t_s_i = distance[u] if u in distance else float('inf')
-        #print("t_s_i: ", t_s_i)
         t_s_j = distance[v] if v in distance else float('inf')
-        #print("t_s_j: ", t_s_j)
+
         c_prime = c_ij + t_s_i - t_s_j
-        #print("c_prime: ", c_prime)
-        transformed_graph.add_edge(u, v, weight=c_prime)
+        print("c_prime: ", c_prime)
+        grafo_residual[u][v]['cost'] = c_prime
 
     # step 2.2: remove all the arcs on the shortest path that are towards the source
     for i in range(len(path) - 1):
         u, v = path[i], path[i + 1]
-        if transformed_graph.has_edge(u, v):
-            transformed_graph.remove_edge(u, v)
+        if grafo_residual.has_edge(u, v):
+            grafo_residual.remove_edge(u, v)
+
+    # node splitting
+
+
 
     # step 2.3: reverse the direction for the arcs on the shortest path (all of null cost)
-    for i in range(len(path) - 1):
-        u, v = path[i], path[i + 1]
-        transformed_graph.add_edge(v, u, weight=0)
+    #for i in range(len(path) - 1):
+    #    u, v = path[i], path[i + 1]
+    #    grafo_residual.add_edge(v, u, weight=0)
 
     # step 3. find a new minimum-cost path from s to d in the changed network
     try:
-        new_path = nx.shortest_path(transformed_graph, origem, destino, weight='weight')
-        new_cost = nx.shortest_path_length(transformed_graph, origem, destino, weight='weight')
+        new_path = nx.shortest_path(grafo_residual, origem, destino, weight='cost')
+        new_cost = nx.shortest_path_length(grafo_residual, origem, destino, weight='cost')
     except nx.NetworkXNoPath:
         print(f"\n[AVISO] Não há caminho alternativo disponível de {origem} para {destino} após transformação pelo método Suurbale.")
         return path, None
@@ -356,7 +194,88 @@ def suurbale(G, origem, destino):
             visited_edges.add((u, v))
             disjoint_paths.append((u, v))
 
-    print(f"Combined path: {path} and {new_path}")
-    print(f"Disjoint paths: {disjoint_paths}")
+    return path, new_path, grafo_residual
 
-    return path, new_path
+# ------------------------------------------------------
+def draw_suurbale_graph(G, node_mapping, origem, destino, caminho1, caminho2, caminho3):
+    
+    plt.figure(figsize=(12, 8))
+    
+    # Get node positions
+    pos = nx.get_node_attributes(G, 'pos')
+
+    # Create node labels
+    labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
+
+    # Verify source and destination exist
+    origem_nome = node_mapping.get(origem, None)
+    destino_nome = node_mapping.get(destino, None)
+
+    if origem_nome is None or destino_nome is None:
+        raise ValueError(f"Os nós origem ({origem}) ou destino ({destino}) não estão no mapeamento.")
+
+    # Set node colors
+    node_colors = [
+        'green' if nome == origem_nome else 'red' if nome == destino_nome else 'lightblue'
+        for nome in G.nodes
+    ]
+
+    # Draw nodes
+    nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
+    nx.draw_networkx_labels(G, pos, labels)
+
+    # Draw base edges with different curve parameters for each direction
+    for (u, v, d) in G.edges(data=True):
+        # Forward edge (positive curve)
+        nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], 
+                            edge_color='gray', alpha=0.3, width=1,
+                            connectionstyle=f"arc3,rad=0.2")
+        # Reverse edge (negative curve)
+        nx.draw_networkx_edges(G, pos, edgelist=[(v, u)], 
+                            edge_color='gray', alpha=0.3, width=1,
+                            connectionstyle=f"arc3,rad=-0.2")
+
+    # Draw paths with different curves
+    if caminho1:
+        path_edges1 = list(zip(caminho1, caminho1[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, 
+                            edge_color='green', width=2,
+                            connectionstyle=f"arc3,rad=0.2")
+
+    if caminho2:
+        path_edges2 = list(zip(caminho2, caminho2[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, 
+                            edge_color='blue', width=2,
+                            connectionstyle=f"arc3,rad=-0.2")
+    
+    if caminho3:
+        path_edges3 = list(zip(caminho3, caminho3[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, 
+                            edge_color='magenta', width=2,
+                            connectionstyle=f"arc3,rad=0.3")
+
+    # Add edge labels with different positions for each direction
+    for u, v, d in G.edges(data=True):
+        # Position for forward edge label
+        x1 = pos[u][0] * 0.6 + pos[v][0] * 0.4
+        y1 = pos[u][1] * 0.6 + pos[v][1] * 0.4 + 0.1  # Offset above the edge
+        
+        # Position for reverse edge label
+        x2 = pos[u][0] * 0.4 + pos[v][0] * 0.6
+        y2 = pos[u][1] * 0.4 + pos[v][1] * 0.6 - 0.1  # Offset below the edge
+        
+        # Draw both labels
+        print("u, v", u, v)
+        print("d: ", d)
+        print("d['cost']: ", d['cost'])
+
+        plt.text(x1, y1, f"{d['cost']}", fontsize=8, 
+                bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
+        #plt.text(x2, y2, f"{d['cost']}", fontsize=8, 
+                #bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
+
+    input("enter")
+    plt.title("Suurballe's Algorithm Graph")
+    plt.axis('off')
+    plt.tight_layout()
+    plt.show(block=False)
