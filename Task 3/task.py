@@ -3,7 +3,7 @@ from menus import *
 from draw import *
 
 """!
-@file task2.py
+@file task3.py
 @mainpage Two Step Approach
 @brief Programa para exibir gráficos de rede, implementando o Two Step Approach, para encontrar um par de caminhos disjuntos.
 
@@ -16,14 +16,14 @@ from draw import *
 
 networks = ["networks/abilene.txt", "networks/atlanta.txt", "networks/nobel-eu.txt", "networks/nobel-germany.txt"]
 
-while True: 
+while True:
 
     """!
     @brief Função principal do programa.
     @details Exibe o menu e mostra a opção escolhida pelo user.
     """
 
-    clear_screen()
+    clear_screen()  
     print(" \n-------------- Redes disponíveis: ---------------")
     for i, ficheiro in enumerate(networks, 1):
         display_name = ficheiro.replace('networks/', '')
@@ -67,7 +67,7 @@ while True:
             @param node_mapping Mapa dos nós.
             """
             # Mostrar a rede antes de pedir os nós, para o user poder escolher
-            #draw_empty_network(G, node_mapping)
+            draw_empty_network(G, node_mapping)
 
             """!
             @brief Solicita os nós de origem e destino ao user.

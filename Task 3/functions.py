@@ -138,25 +138,42 @@ def find_best_paths(G, origem, destino):
 def suurbale(G, origem, destino):
     
     # step 1: find the minimum cost path tree from source s to all other nodes
-    path = nx.shortest_path(G, origem, destino, weight='cost')
-    cost = nx.shortest_path_length(G, origem, destino, weight='cost')
-    #print(f"Shortest path from {origem} to {destino}: {path} with cost {cost}")
-
+    path = nx.shortest_path(G, origem, weight='cost')
+    
     # step 2: transform the network, by
 
     # step 2.1: compute the reduced costs for all network arcs, as c'(i, j) = c(i, j) + t(s, i) - t(s, j)
-    distance = nx.single_source_dijkstra_path_length(G, origem, weight='cost')
+    
+    # calcula c_ij para cada nó, segundo o caminho mais curto
+    distance = nx.shortest_path_length(G, origem, weight='cost')
+    print("distância: ", distance)
     grafo_residual = G.copy()
 
-    for u, v, data in G.edges(data=True):
+    # para cada arco, calculamos o custo reduzido c'(i, j)
+    # para isso, temos
+    # # c_ij que é o custo do arco entre i e j
+    # # t_s_i que é o custo do nó i (anterior)
+    # # t_s_j que é o custo do nó j (posterior)
+
+    # se fizer parte da árvore calculada em "path", de certeza que será 0
+    for anterior, proximo, data in G.edges(data=True):
 
         c_ij = data.get('cost', 1)
-        t_s_i = distance[u] if u in distance else float('inf')
-        t_s_j = distance[v] if v in distance else float('inf')
-
+        print("anterior: ", anterior)
+        print("proximo: ", proximo)
+        print("data: ", data)
+        print("custo caminho entre os 2, c_ij = ", c_ij)
+        t_s_i = distance[anterior] if anterior in distance else float('inf')
+        print("custo do no anterior = ", t_s_i)
+        t_s_j = distance[proximo] if proximo in distance else float('inf')
+        print("custo do no posterior = ", t_s_j)
         c_prime = c_ij + t_s_i - t_s_j
-        print("c_prime: ", c_prime)
-        grafo_residual[u][v]['cost'] = c_prime
+        print("c' = ", c_ij, "+", t_s_i, "-", t_s_j, " = ", c_prime)
+        
+        grafo_residual[anterior][proximo]['cost'] = c_prime
+
+    # a partir daqui, o grafo residual tem, para "path", custos de arcos a 0
+    # e para as restantes arestas, o custo reduzido
 
     # step 2.2: remove all the arcs on the shortest path that are towards the source
     for i in range(len(path) - 1):
@@ -198,84 +215,103 @@ def suurbale(G, origem, destino):
 
 # ------------------------------------------------------
 def draw_suurbale_graph(G, node_mapping, origem, destino, caminho1, caminho2, caminho3):
-    
-    plt.figure(figsize=(12, 8))
-    
     # Get node positions
     pos = nx.get_node_attributes(G, 'pos')
 
-    # Create node labels
-    labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
+    # Create a figure with adjusted layout
+    plt.figure(figsize=(12, 8))
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-    # Verify source and destination exist
+    # Create node labels and colors
+    labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
     origem_nome = node_mapping.get(origem, None)
     destino_nome = node_mapping.get(destino, None)
 
     if origem_nome is None or destino_nome is None:
         raise ValueError(f"Os nós origem ({origem}) ou destino ({destino}) não estão no mapeamento.")
 
-    # Set node colors
-    node_colors = [
-        'green' if nome == origem_nome else 'red' if nome == destino_nome else 'lightblue'
+    node_colors = {
+        nome: 'green' if nome == origem_nome else
+              'red' if nome == destino_nome else
+              'lightblue'
         for nome in G.nodes
-    ]
+    }
 
-    # Draw nodes
-    nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
-    nx.draw_networkx_labels(G, pos, labels)
-
-    # Draw base edges with different curve parameters for each direction
-    for (u, v, d) in G.edges(data=True):
-        # Forward edge (positive curve)
-        nx.draw_networkx_edges(G, pos, edgelist=[(u, v)], 
-                            edge_color='gray', alpha=0.3, width=1,
-                            connectionstyle=f"arc3,rad=0.2")
-        # Reverse edge (negative curve)
-        nx.draw_networkx_edges(G, pos, edgelist=[(v, u)], 
-                            edge_color='gray', alpha=0.3, width=1,
-                            connectionstyle=f"arc3,rad=-0.2")
-
-    # Draw paths with different curves
-    if caminho1:
-        path_edges1 = list(zip(caminho1, caminho1[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, 
-                            edge_color='green', width=2,
-                            connectionstyle=f"arc3,rad=0.2")
-
-    if caminho2:
-        path_edges2 = list(zip(caminho2, caminho2[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, 
-                            edge_color='blue', width=2,
-                            connectionstyle=f"arc3,rad=-0.2")
-    
-    if caminho3:
-        path_edges3 = list(zip(caminho3, caminho3[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, 
-                            edge_color='magenta', width=2,
-                            connectionstyle=f"arc3,rad=0.3")
-
-    # Add edge labels with different positions for each direction
+    # Draw base edges with curved arrows
     for u, v, d in G.edges(data=True):
-        # Position for forward edge label
-        x1 = pos[u][0] * 0.6 + pos[v][0] * 0.4
-        y1 = pos[u][1] * 0.6 + pos[v][1] * 0.4 + 0.1  # Offset above the edge
+        # Draw forward edge
+        nx.draw_networkx_edges(G, pos, 
+                             edgelist=[(u, v)],
+                             edge_color='gray',
+                             alpha=0.3,
+                             width=1,
+                             arrows=True,
+                             arrowsize=20,  # Increased arrow size
+                             connectionstyle=f"arc3,rad=0.2")
         
-        # Position for reverse edge label
-        x2 = pos[u][0] * 0.4 + pos[v][0] * 0.6
-        y2 = pos[u][1] * 0.4 + pos[v][1] * 0.6 - 0.1  # Offset below the edge
-        
-        # Draw both labels
-        print("u, v", u, v)
-        print("d: ", d)
-        print("d['cost']: ", d['cost'])
+        # Draw backward edge
+        nx.draw_networkx_edges(G, pos,
+                             edgelist=[(v, u)],
+                             edge_color='gray',
+                             alpha=0.3,
+                             width=1,
+                             arrows=True,
+                             arrowsize=20,  # Increased arrow size
+                             connectionstyle=f"arc3,rad=0.2")
 
-        plt.text(x1, y1, f"{d['cost']}", fontsize=8, 
-                bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
-        #plt.text(x2, y2, f"{d['cost']}", fontsize=8, 
-                #bbox=dict(facecolor='white', edgecolor='none', alpha=0.7))
+    # Draw paths with curved arrows
+    def draw_path_edges(path, color):
+        if path:
+            path_edges = list(zip(path, path[1:]))
+            for u, v in path_edges:
+                nx.draw_networkx_edges(G, pos,
+                                     edgelist=[(u, v)],
+                                     edge_color=color,
+                                     width=3,
+                                     arrows=True,
+                                     arrowsize=25,  # Bigger arrows for highlighted paths
+                                     connectionstyle=f"arc3,rad=0.2")
 
-    input("enter")
+    # Draw the three paths
+    draw_path_edges(caminho1, 'green')
+    draw_path_edges(caminho2, 'blue')
+    draw_path_edges(caminho3, 'magenta')
+
+    # Add edge labels with curved positioning
+    edge_labels = {}
+    for u, v, d in G.edges(data=True):
+        # Label for forward edge
+        edge_labels[(u, v)] = f"{d['cost']}"
+
+    nx.draw_networkx_edge_labels(G, pos,
+                                edge_labels=edge_labels,
+                                font_size=8,
+                                font_color='blue',
+                                label_pos=0.3)  # Adjust label position for curved edges
+
+    # Draw node labels with colored backgrounds
+    for nome, (x, y) in pos.items():
+        label_text = labels.get(nome, nome)
+        plt.text(x, y, label_text,
+                fontsize=8,
+                fontweight='bold',
+                bbox=dict(facecolor=node_colors.get(nome, 'lightblue'),
+                         edgecolor='black',
+                         boxstyle='round,pad=0.3'),
+                horizontalalignment='center',
+                verticalalignment='center')
+
+    # Add legend
+    legend_items = [
+        plt.Line2D([], [], color='green', linewidth=3, label="Shortest Path"),
+        plt.Line2D([], [], color='blue', linewidth=3, label="Alternative Path"),
+        plt.Line2D([], [], color='magenta', linewidth=3, label="Suurbale Path"),
+        plt.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Source Node"),
+        plt.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Target Node")
+    ]
+    plt.legend(handles=legend_items, loc='upper right')
+
     plt.title("Suurballe's Algorithm Graph")
     plt.axis('off')
     plt.tight_layout()
-    plt.show(block=False)
+    plt.show()
