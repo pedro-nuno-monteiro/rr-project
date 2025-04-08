@@ -1,5 +1,6 @@
 from functions import *
 from menus import *
+import matplotlib.pyplot as plt
 
 """!
 @file task2.py
@@ -98,8 +99,33 @@ while True:
                 draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
 
             else: 
-                caminho1, caminho2 = suurbale(G, node_mapping[origem], node_mapping[destino])
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2)
+                # --- Call Suurballe's Algorithm ---
+                origem_nome = node_mapping[origem]
+                destino_nome = node_mapping[destino]
+
+                # Run Suurballe + Node Splitting, get intermediate results
+                path1_orig, path2_orig, G_split, P1_split, G_transformed, P2_split = \
+                    suurballe_disjoint_paths(G, origem_nome, destino_nome)
+
+                # --- Draw Intermediate Steps ---
+                if G_split and P1_split: # Check if at least step 1 completed
+                    # Pass G for original positions, node_mapping for context
+                    draw_suurballe_steps(G_split, P1_split, G_transformed, P2_split,
+                                         G, node_mapping, origem_nome, destino_nome)
+                else:
+                    print("Could not visualize intermediate steps as the algorithm failed early.")
+
+
+                # --- Draw Final Result on Original Graph ---
+                if path1_orig:
+                    print("\nDisplaying final result on the original graph...")
+                    # Create a new figure for the final result
+                    plt.figure("Final Disjoint Paths Result", figsize=(12,8))
+                    draw_network(G, node_mapping, origem, destino, path1_orig, path2_orig) # Pass original indices and node names
+                    plt.show(block=True) # Use block=True for the final plot to keep all windows open
+                else:
+                    print(f"\nCould not find two node-disjoint paths between {origem_nome} and {destino_nome} using Suurballe.")
+                    input("Press Enter to continue...") # Pause screen
     
     
     elif escolha == 4:
