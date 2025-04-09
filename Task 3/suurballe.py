@@ -13,21 +13,9 @@ def draw_suurballe_steps(G_split, P1_split, G_transformed, P2_split, G_original,
     # --- Calculate Layout based on Original Positions ---
     pos_orig = nx.get_node_attributes(G_original, 'pos')
     pos_split = {}
-    node_size = 350 # Slightly larger nodes might help too
-    font_size = 8   # Slightly larger font
-    # INCREASED OFFSET for better separation <<<<<<<<<<<<<<<<<<<<<<<
-    offset = 0.4  # Aumentado de 0.1 - ajuste conforme necessário
-
-    # Determine coordinate range to potentially scale offset, but fixed value is simpler first
-    # x_coords = [p[0] for p in pos_orig.values()]
-    # y_coords = [p[1] for p in pos_orig.values()]
-    # x_range = max(x_coords) - min(x_coords) if x_coords else 1
-    # y_range = max(y_coords) - min(y_coords) if y_coords else 1
-    # avg_range = (x_range + y_range) / 2
-    # dynamic_offset = avg_range * 0.05 # Example dynamic offset calculation
-    # offset = dynamic_offset # Use dynamic offset if preferred
-
-    print(f"Using node separation offset: {offset}")
+    node_size = 350 
+    font_size = 8   
+    offset = 0.3
 
     for node_orig, pos_xy in pos_orig.items():
         node_in = f"{node_orig}_in"
