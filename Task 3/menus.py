@@ -1,4 +1,5 @@
-import os, sys
+import os
+import matplotlib.pyplot as plt
 
 def ask_network():
     """!
@@ -54,7 +55,9 @@ def ask_origin_destiny(node_mapping):
         except ValueError:
             print("\nNúmero inválido. Por favor, escolha um número da lista.")  
     
-    return origem, destino
+    plt.close()
+
+    return node_mapping[origem], node_mapping[destino]
 
 # ------------------------------------------------------
 def clear_screen():

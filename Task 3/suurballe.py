@@ -213,8 +213,8 @@ def suurballe_disjoint_paths(G_original, source, target):
 
             # Check if the target node is reachable (present in the distances/paths keys)
             if d_split not in distances:
-                 print(f"Target node {d_split} not reachable from {s_split} in split graph (not in Dijkstra results).")
-                 return None, None, G_split, None, None, None
+                print(f"Target node {d_split} not reachable from {s_split} in split graph (not in Dijkstra results).")
+                return None, None, G_split, None, None, None
 
             # Get the specific path P1 from s_split to d_split
             P1_split = first_paths_dict[d_split]
@@ -227,8 +227,8 @@ def suurballe_disjoint_paths(G_original, source, target):
             return None, None, G_split, None, None, None # Return G_split found so far
         except KeyError as e:
             # This might happen if d_split isn't in first_paths_dict, indicating unreachability
-             print(f"KeyError accessing path/distance for {e}. Target {d_split} likely not reachable from {s_split}.")
-             return None, None, G_split, None, None, None # Return G_split found so far
+            print(f"KeyError accessing path/distance for {e}. Target {d_split} likely not reachable from {s_split}.")
+            return None, None, G_split, None, None, None # Return G_split found so far
 
 
         # --- Step 2: Transform the network G' ---

@@ -25,15 +25,18 @@ while True:
     """
 
     clear_screen()  
-    print(" \n-------------- Redes disponíveis: ---------------")
+    print(" \n-------------- Opções disponíveis: ---------------\n")
+    print(" Redes disponíveis:")
     for i, ficheiro in enumerate(networks, 1):
         display_name = ficheiro.replace('networks/', '')
-        print(f"{i}. {display_name}")
-    print("5. Inserir outra rede")
-    print("6. Sair")
-    print("----------------------------------------------------")
+        print(f"  {i}. {display_name}")
+    print("")
+    print(" Outras opções:")
+    print("  5. Inserir outra rede")
+    print("  6. Sair")
+    print("--------------------------------------------------")
     
-    escolha = int(input("Digite o número da rede que deseja analisar: ")) - 1
+    escolha = int(input("Digite a opção pretendida: ")) - 1
     
     if 0 <= escolha < len(networks) or escolha == 4:
         
@@ -94,7 +97,7 @@ while True:
                 @return custo2 Custo do segundo caminho.
                 """
                 # encontrar os caminhos mais curtos
-                caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
+                caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino)
 
                 """!
                 @brief Desenha o grafo com os caminhos encontrados.
@@ -109,33 +112,33 @@ while True:
                 # desenhar o grafo
                 draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=None, algoritmo=algoritmo)
 
-            if algoritmo == 2: 
-                origem_nome = node_mapping[origem]
-                destino_nome = node_mapping[destino]
+            if algoritmo == 2:
+
+                caminho1, caminho2 = suurbale(G, origem, destino, node_mapping)
+
+                #draw_graph_5(G, node_mapping, origem, destino, caminho1, caminho2)
 
                 # Run Suurballe + Node Splitting, get intermediate results
-                path1_orig, path2_orig, G_split, P1_split, G_transformed, P2_split = \
-                    suurballe_disjoint_paths(G, origem_nome, destino_nome)
+                #path1_orig, path2_orig, G_split, P1_split, G_transformed, P2_split = suurballe_disjoint_paths(G, origem_nome, destino_nome)
 
                 # --- Draw Intermediate Steps ---
-                if G_split and P1_split: # Check if at least step 1 completed
+                #if G_split and P1_split: # Check if at least step 1 completed
                     # Pass G for original positions, node_mapping for context
-                    draw_suurballe_steps(G_split, P1_split, G_transformed, P2_split,
-                                         G, node_mapping, origem_nome, destino_nome)
-                else:
-                    print("Could not visualize intermediate steps as the algorithm failed early.")
+                #    draw_suurballe_steps(G_split, P1_split, G_transformed, P2_split, G, node_mapping, origem_nome, destino_nome)
+                #else:
+                #    print("Could not visualize intermediate steps as the algorithm failed early.")
 
 
                 # --- Draw Final Result on Original Graph ---
-                if path1_orig:
-                    print("\nDisplaying final result on the original graph...")
-                    # Create a new figure for the final result
-                    plt.figure("Final Disjoint Paths Result", figsize=(12,8))
-                    draw_network_1(G, node_mapping, origem, destino, path1_orig, path2_orig) # Pass original indices and node names
-                    plt.show(block=True) # Use block=True for the final plot to keep all windows open
-                else:
-                    print(f"\nCould not find two node-disjoint paths between {origem_nome} and {destino_nome} using Suurballe.")
-                    input("Press Enter to continue...") # Pause screen
+                #if path1_orig:
+                #    print("\nDisplaying final result on the original graph...")
+                #    # Create a new figure for the final result
+                #    plt.figure("Final Disjoint Paths Result", figsize=(12,8))
+                #    draw_network_1(G, node_mapping, origem, destino, path1_orig, path2_orig) # Pass original indices and node names
+                #    plt.show(block=True) # Use block=True for the final plot to keep all windows open
+                #else:
+                #    print(f"\nCould not find two node-disjoint paths between {origem_nome} and {destino_nome} using Suurballe.")
+                #    input("Press Enter to continue...") # Pause screen
                     
             if algoritmo == 3:
                 #caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
