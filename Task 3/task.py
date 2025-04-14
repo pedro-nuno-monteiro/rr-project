@@ -1,7 +1,6 @@
 from functions import *
 from menus import *
 from draw import *
-from suurballe import *
 
 """!
 @file task3.py
@@ -110,11 +109,11 @@ while True:
                 @param caminho3 Caminho Suurbale.
                 """
                 # desenhar o grafo
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=None, algoritmo=algoritmo)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo=algoritmo)
 
             if algoritmo == 2:
 
-                caminho1, caminho2 = suurbale(G, origem, destino, node_mapping)
+                caminho1, caminho2 = suurbale(G, origem, destino)
 
                 #draw_graph_5(G, node_mapping, origem, destino, caminho1, caminho2)
 
