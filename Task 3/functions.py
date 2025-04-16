@@ -1,5 +1,6 @@
 import networkx as nx
 from draw import *
+from menus import clear_screen
 
 def retrieve_data(data):
     
@@ -135,103 +136,141 @@ def find_best_paths(G, origem, destino):
     return path1, cost1, path2, cost2
 
 # ------------------------------------------------------
-def suurbale(G_original, origem_orig, destino_orig):
+def suurbale(G, origem_orig, destino_orig):
     
-    print(f"\n--- Suurballe Node-Disjoint para {origem_orig} -> {destino_orig} ---")
+    clear_screen()
+
+    print(f"\n--- Algoritmo de Suurballe com Node Splitting de {origem_orig} para {destino_orig} ---")
+    print("")
+    print("- Ao longo do algoritmo, serão apresentados vários gráficos, de acordo")
+    print("- com os diferentes passos do algoritmo (0 a 4).")
+    print("")
+    print("- NOTA: Para passar ao passo seguinte, é necessário fechar o gráfico atual.")
 
     # --- PASSO 0: Node Splitting ---
-    try:
-        H, s, t = split_node_graph(G_original, origem_orig, destino_orig)
-        print(f"Grafo dividido H criado. Origem s={s}, Destino t={t}.")
-        draw_graph_5(H, s, t, None, None, "Step0_SplitGraph")
-    except Exception as e:
-        print(f"Falha no Node Splitting: {e}")
-        return None, None
+    # H - grafo com node splitting
+    # s - origem (source_out) no grafo dividido
+    # t - destino (target_in) no grafo dividido
+    H, s, t = split_nodes(G, origem_orig, destino_orig)
+    print(f"\nOrigem, s = {s} até destino, t = {t}")
+
+    draw_suurballe(H, s, t, None, None, "Step 0 - Node Splitting")
 
     # --- A partir daqui, usar H, s, t ---
 
-    # Step 1: Find the minimum cost path tree from s to all other nodes in H
-    try:
-        distance = nx.shortest_path_length(H, source=s, weight='cost')
-        path_dict = nx.shortest_path(H, source=s, weight='cost')
-        if t not in path_dict:
-             print(f"Destino t={t} não alcançável a partir de s={s} em H.")
-             return None, None
-        P1_split_nodes = path_dict[t] # Caminho P1 no grafo H
-        print(f"Step 1: P1 (split) = {P1_split_nodes}")
-        draw_graph_5(H, s, t, P1_split_nodes, None, "Step1_H_with_P1")
-    except nx.NetworkXNoPath:
-         print(f"Não existe caminho de s={s} para t={t} em H.")
-         return None, None
-    except Exception as e:
-         print(f"Erro no Step 1 (Dijkstra/Path): {e}")
-         return None, None
+    # step 1: find the minimum cost path tree from source s to all other nodes
+    
+    # path contém todos os caminhos mais curtos desde a origem, s, até todos os restantes nós
+    path = nx.shortest_path(H, source = s, weight = 'cost')
 
-    # Step 2: Transform the network H -> H_trans
-    H_trans = H.copy()
+    if t not in path:
+        print(f"Destino t={t} não alcançável a partir de s={s} em H.")
+        return None, None
+    
+    # caminho mais curto até ao destino
+    P1_split_nodes = path[t] # Caminho P1 no grafo H
+    print(f"Step 1: P1 (split) = {P1_split_nodes}")
+    draw_suurballe(H, s, t, P1_split_nodes, None, "Step 1 - 1º Caminho mais curto")
 
-    # Step 2.1: Compute reduced costs
-    print("Step 2.1: Calculando custos reduzidos...")
-    for u, v, data in H.edges(data=True): # Iterar H
+    # step 2: transform the network, by
+    H_residual = H.copy()
+
+    # step 2.1: compute the reduced costs for all network arcs, as c'(i, j) = c(i, j) + t(s, i) - t(s, j)
+    # para cada arco, calculamos o custo reduzido c'(i, j)
+    # para isso, temos
+    # # c_ij que é o custo do arco entre i e j
+    # # t_s_i que é o custo do nó i (anterior)
+    # # t_s_j que é o custo do nó j (posterior)
+
+    # distance é um dicionário que contem o custa da distância da origem a cada nó
+    distance = nx.shortest_path_length(H, source = s, weight = 'cost')
+
+    # u e v representam o nó anterior e o nó posterior, respectivamente
+    for u, v, data in H.edges(data=True):
         c_ij = data.get('cost', 1)
-        t_s_u = distance.get(u, float('inf')) # Distância s->u em H
-        t_s_v = distance.get(v, float('inf')) # Distância s->v em H
-        if t_s_u == float('inf') or t_s_v == float('inf'):
+        t_s_i = distance.get(u, float('inf'))
+        t_s_j = distance.get(v, float('inf'))
+        if t_s_i == float('inf') or t_s_j == float('inf'):
             c_prime = float('inf')
         else:
-            c_prime = c_ij + t_s_u - t_s_v
-            c_prime = max(0, c_prime) # Garante não-negatividade
+            c_prime = c_ij + t_s_i - t_s_j
+            c_prime = max(0, c_prime) # Garante que o custo não seja negativo
 
-        if H_trans.has_edge(u, v):
-             H_trans[u][v]['cost'] = c_prime # Atualiza custo em H_trans
-        # else: print(f"Aviso 2.1: Aresta ({u},{v}) não encontrada em H_trans.")
+        if H_residual.has_edge(u, v):
+            H_residual[u][v]['cost'] = c_prime
 
-    draw_graph_5(H_trans, s, t, None, None, "Step2_1_ReducedCosts")
+    # a partir daqui, o grafo residual tem, para "path", custos de arcos a 0
+    # e para as restantes arestas, o custo reduzido
 
-    # Step 2.2: Remove arcs on the shortest path P1 that are towards the source (v, u)
+    draw_suurballe(H_residual, s, t, None, None, "Step 2.1 - Custos Reduzidos")
+
+    # step 2.2: remove all the arcs on the shortest path that are towards the source
     print("Step 2.2: Removendo arcos de P1 em direção à origem...")
     removed_count_2_2 = 0
     P1_split_edges = list(zip(P1_split_nodes[:-1], P1_split_nodes[1:]))
+
     for u, v in P1_split_edges:
-        if H_trans.has_edge(v, u):
-            H_trans.remove_edge(v, u)
+        # Check if there's a reverse edge in the residual graph
+        if H_residual.has_edge(v, u):
+            print(f"Removendo arco reverso ({v}, {u})")
+            H_residual.remove_edge(v, u)
             removed_count_2_2 += 1
+        
+        # Also check for edges that could lead back to source through split nodes
+        u_base = u.rsplit('_', 1)[0]
+        v_base = v.rsplit('_', 1)[0]
+        u_in = f"{u_base}_in"
+        u_out = f"{u_base}_out"
+        v_in = f"{v_base}_in"
+        v_out = f"{v_base}_out"
+        
+        # Remove any reverse connections through split nodes
+        if H_residual.has_edge(v_out, u_in):
+            print(f"Removendo arco split reverso ({v_out}, {u_in})")
+            H_residual.remove_edge(v_out, u_in)
+            removed_count_2_2 += 1
+
     print(f"Removidos {removed_count_2_2} arcos.")
 
-    draw_graph_5(H_trans, s, t, None, None, "Step2_2_AfterReverseRemoval")
+    draw_suurballe(H_residual, s, t, None, None, "Step 2.2 - Arcos Removidos")
 
-    # Step 2.3: Reverse direction for the arcs on P1 (u, v) -> (v, u) cost 0
+    # step 2.3: reverse the direction for the arcs on the shortest path (all of null cost)
     print("Step 2.3: Revertendo arcos de P1 com custo 0...")
     removed_count_2_3 = 0
     added_count_2_3 = 0
     for u, v in P1_split_edges:
-        if H_trans.has_edge(u, v):
-            H_trans.remove_edge(u, v)
+        if H_residual.has_edge(u, v):
+            H_residual.remove_edge(u, v)
             removed_count_2_3 += 1
-        # else: print(f"Aviso 2.3: Aresta P1 ({u},{v}) não encontrada para remoção.")
-        H_trans.add_edge(v, u, cost=0) # Adiciona (v,u) com cost=0
+        H_residual.add_edge(v, u, cost = 0) # Adiciona (v, u) com cost = 0
         added_count_2_3 += 1
     print(f"Removidos {removed_count_2_3} arcos, adicionados {added_count_2_3} arcos invertidos.")
 
-    draw_graph_5(H_trans, s, t, None, None, "Step2_3_AfterReversing")
+    draw_suurballe(H_residual, s, t, None, None, "Step 2.3 - Arcos Invertidos")
 
-    # Step 3: Find a new minimum-cost path P2 from s to t in H_trans
-    print("Step 3: Procurando P2 no grafo transformado H_trans...")
+    # step 3. find a new minimum-cost path from s to d in the changed network
+    print("Step 3: Procurando P2 no grafo transformado H_residual...")
+    
     try:
-        P2_split_nodes = nx.shortest_path(H_trans, source=s, target=t, weight='cost')
+
+        # encontrar novo caminho mais curto entre s e t
+        P2_split_nodes = nx.shortest_path(H_residual, source = s, target = t, weight = 'cost')
         print(f"Step 3: P2 (split) = {P2_split_nodes}")
-        draw_graph_5(H_trans, s, t, P1_split_nodes, P2_split_nodes, "Step3_H_trans_with_P2")
+        draw_suurballe(H_residual, s, t, P1_split_nodes, P2_split_nodes, "Step 3 - Com 2.º Caminho")
+    
     except nx.NetworkXNoPath:
         print("Não foi encontrado um segundo caminho disjunto (Step 3).")
         # Apenas P1 existe. Faz merge e retorna.
         path1_final_merged = merge_split_path(P1_split_nodes)
         return path1_final_merged, None
+    
     except Exception as e:
-         print(f"Erro no Step 3 (Shortest Path em H_trans): {e}")
-         path1_final_merged = merge_split_path(P1_split_nodes)
-         return path1_final_merged, None # Fallback para P1
+        print(f"Erro no Step 3 (Shortest Path em H_residual): {e}")
+        path1_final_merged = merge_split_path(P1_split_nodes)
+        return path1_final_merged, None # Fallback para P1
 
-    # --- PASSO 4: Remover sobreposições e reconstruir (NECESSÁRIO) ---
+    # step 4. remove the common arcs with opposite directions in the computed paths. 
+    # the remaining arcs form two minimum-cost disjoint paths.
     print("Step 4: Removendo sobreposições e reconstruindo...")
     P1_edges_set = set(P1_split_edges) # Já calculado: arestas (u,v) de P1
     P2_edges_set = set(zip(P2_split_nodes[:-1], P2_split_nodes[1:])) # Arestas (x,y) de P2
@@ -256,20 +295,20 @@ def suurbale(G_original, origem_orig, destino_orig):
         if s not in G_path1_split: G_path1_split.add_node(s)
         if t not in G_path1_split: G_path1_split.add_node(t)
         if G_path1_split.number_of_edges() > 0 or (s == t and G_path1_split.has_node(s)):
-             path1_final_split = nx.shortest_path(G_path1_split, s, t)
+            path1_final_split = nx.shortest_path(G_path1_split, s, t)
     except (nx.NetworkXNoPath, nx.NodeNotFound): path1_final_split = []
 
     try: # Reconstroi P2 final
         if s not in G_path2_split: G_path2_split.add_node(s)
         if t not in G_path2_split: G_path2_split.add_node(t)
         if G_path2_split.number_of_edges() > 0 or (s == t and G_path2_split.has_node(s)):
-             path2_final_split = nx.shortest_path(G_path2_split, s, t)
+            path2_final_split = nx.shortest_path(G_path2_split, s, t)
     except (nx.NetworkXNoPath, nx.NodeNotFound): path2_final_split = []
 
     print(f"Step 4: P1 final reconstruído (split) = {path1_final_split}")
     print(f"Step 4: P2 final reconstruído (split) = {path2_final_split}")
 
-    draw_graph_5(H_trans, s, t, path1_final_split, path2_final_split, "Step4_FinalSplitPaths")
+    draw_suurballe(H_residual, s, t, path1_final_split, path2_final_split, "Step 4 - FinalSplitPaths")
 
     # --- PASSO FINAL: Merge para Nós Originais ---
     print("--- Merge final para nós originais ---")
@@ -281,9 +320,9 @@ def suurbale(G_original, origem_orig, destino_orig):
         print("Aviso: P1 ficou vazio após merge.")
         final_path1_merged, final_path2_merged = final_path2_merged, None
     elif not final_path1_merged and not final_path2_merged:
-         print("Erro: Ambos os caminhos finais estão vazios.")
-         # Se P1 original existia, retorna-o como fallback?
-         return merge_split_path(P1_split_nodes) if P1_split_nodes else None, None
+        print("Erro: Ambos os caminhos finais estão vazios.")
+        # Se P1 original existia, retorna-o como fallback?
+        return merge_split_path(P1_split_nodes) if P1_split_nodes else None, None
 
     if final_path1_merged and final_path2_merged and final_path1_merged == final_path2_merged:
         print("Aviso: Caminhos finais (merged) idênticos.")
@@ -296,51 +335,54 @@ def suurbale(G_original, origem_orig, destino_orig):
     return final_path1_merged, final_path2_merged
 
 # ------------------------------------------------------
-def split_node_graph(G_original, source_orig, target_orig):
+def split_nodes(G, source_orig, target_orig):
+
     """
-    Transforma grafo G_original dividindo cada nó A em A_in, A_out.
+    Transforma grafo G dividindo cada nó A em A_in, A_out.
     Retorna o grafo dividido H, a nova origem s (source_out) e novo destino t (target_in).
     """
+    
+    # fazemos as alterações num grafo copiado
     H = nx.DiGraph()
-    new_mapping = {} # Mapeia nome original -> (nome_in, nome_out)
+    
+    # Mapeia nome original -> (nome_in, nome_out)
+    new_mapping = {} 
 
     # --- Cria nós divididos e arestas internas ---
-    for node in G_original.nodes():
+    for node in G.nodes():
         node_in = f"{node}_in"
         node_out = f"{node}_out"
         new_mapping[node] = (node_in, node_out)
         H.add_node(node_in)
         H.add_node(node_out)
-        H.add_edge(node_in, node_out, cost=0) # Aresta interna custo 0
+
+        # acrescenta null cost arc
+        H.add_edge(node_in, node_out, cost = 0)
 
     # --- Recria arestas originais ---
-    for u, v, data in G_original.edges(data=True):
+    for u, v, data in G.edges(data=True):
         u_out = new_mapping[u][1] # u_out
         v_in = new_mapping[v][0]  # v_in
         original_cost = data.get('cost', 1)
         H.add_edge(u_out, v_in, cost=original_cost)
 
     # --- Define s e t no grafo dividido ---
-    try:
-        s = new_mapping[source_orig][1]  # source_out
-        t = new_mapping[target_orig][0] # target_in
-    except KeyError as e:
-         print(f"Erro: Nó original '{e}' não encontrado ao definir s/t divididos.")
-         raise # Re-lança a excepção
+    s = new_mapping[source_orig][1] # source_out
+    t = new_mapping[target_orig][0] # target_in
 
     # Garante que s e t existem (caso isolados)
     if not H.has_node(s): H.add_node(s)
     if not H.has_node(t): H.add_node(t)
 
     # Copia atributos 'pos' para o novo grafo (opcional, para debug/visualização)
-    pos_orig = nx.get_node_attributes(G_original, 'pos')
+    pos_orig = nx.get_node_attributes(G, 'pos')
     new_pos = {}
-    offset = 0.35 # Pequeno offset para visualização
+    offset = 0.4 # Pequeno offset para visualização
     for node_orig, pos_xy in pos_orig.items():
-         node_in, node_out = new_mapping[node_orig]
-         x, y = pos_xy
-         if H.has_node(node_in): new_pos[node_in] = (x - offset, y + offset)
-         if H.has_node(node_out): new_pos[node_out] = (x + offset, y - offset)
+        node_in, node_out = new_mapping[node_orig]
+        x, y = pos_xy
+        if H.has_node(node_in): new_pos[node_in] = (x - offset, y + offset)
+        if H.has_node(node_out): new_pos[node_out] = (x + offset, y - offset)
     nx.set_node_attributes(H, new_pos, 'pos')
 
     return H, s, t

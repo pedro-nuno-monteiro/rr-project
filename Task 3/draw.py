@@ -15,9 +15,6 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo
     @param caminho2 Lista de nós que representam o segundo caminho (pode ser None).
     """
 
-    #print("G: ", G.edges(data=True))
-    #input("enter")
-
     # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
 
@@ -70,8 +67,6 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo
         edge_labels[(u, v)] = f"{d['cost']}"
         if edge_labels[(u, v)] == "0.0":
             edge_labels[(u, v)] = "1.0"
-    #print("G: ", G.edges(data=True)) #comentei isto porque tava a aparecer bueda cenas na consola e era meio confuso
-    #input("enter")
 
     # será colocar 2 arcos em vez de ter 1 bidirecional
     # assim 1 fica com 0 e outro com o valor do custo
@@ -134,14 +129,14 @@ def draw_empty_network(G, node_mapping):
     return plt
 
 # ------------------------------------------------------
-def draw_graph_5(G, origem_split, destino_split, caminho1_split, caminho2_split, filename, title_suffix=""):
+def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_split, filename):
     """
     Desenha um grafo (potencialmente dividido ou transformado) e destaca caminhos.
     Adaptado para grafos com nós '_in'/'_out' e sem usar node_mapping original.
     """
-    print(f"Desenhando (modificado): {filename} - {title_suffix}")
+    print(f"\nA desenhar: {filename}")
     # Cria uma nova figura para cada passo para evitar sobreposição
-    plt.figure(f"{filename}_{title_suffix}", figsize=(12, 8)) # Nome único para a figura
+    plt.figure(f"{filename}", figsize=(12, 8)) # Nome único para a figura
 
     # Obtém posições diretamente do grafo G (devem ter sido adicionadas antes)
     pos = nx.get_node_attributes(G, 'pos')
@@ -155,8 +150,8 @@ def draw_graph_5(G, origem_split, destino_split, caminho1_split, caminho2_split,
     # Define cores com base na origem/destino *divididos*
     node_colors = {
         nome: 'lightgreen' if nome == origem_split else
-              'salmon' if nome == destino_split else
-              'skyblue'
+            'salmon' if nome == destino_split else
+            'skyblue'
         for nome in G.nodes()
     }
 
@@ -170,11 +165,11 @@ def draw_graph_5(G, origem_split, destino_split, caminho1_split, caminho2_split,
     # Adiciona rótulos das arestas (atributo 'cost')
     edge_labels = {}
     for u, v, d in G.edges(data=True):
-         cost = d.get('cost', math.inf)
-         label = f"{cost:.1f}" if isinstance(cost, (int, float)) and cost != math.inf else ("0.0" if isinstance(cost, (int, float)) and abs(cost)<1e-9 else "inf")
-         is_internal = u.endswith('_in') and v.endswith('_out') and u.rsplit('_',1)[0] == v.rsplit('_',1)[0]
-         if not (is_internal and abs(cost) < 1e-9): # Não mostra custo 0 nas internas
-             edge_labels[(u, v)] = label
+        cost = d.get('cost', math.inf)
+        label = f"{cost:.1f}" if isinstance(cost, (int, float)) and cost != math.inf else ("0.0" if isinstance(cost, (int, float)) and abs(cost)<1e-9 else "inf")
+        is_internal = u.endswith('_in') and v.endswith('_out') and u.rsplit('_',1)[0] == v.rsplit('_',1)[0]
+        if not (is_internal and abs(cost) < 1e-9): # Não mostra custo 0 nas internas
+            edge_labels[(u, v)] = label
 
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels,
                                 font_size=7, font_color='darkblue',
@@ -210,12 +205,12 @@ def draw_graph_5(G, origem_split, destino_split, caminho1_split, caminho2_split,
     ])
     plt.legend(handles=legend_items, loc='best', fontsize='small')
 
-    plt.title(f"Suurballe Step: {title_suffix}") # Usa title_suffix
+    plt.title(f"Suurballe Step: {filename}")
     plt.axis('off')
     output_filename = f"output/{filename}.png" # Usa filename base
     try:
         plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-        print(f"Grafo guardado em: {output_filename}")
+        print(f"Gráfico guardado na localização: {output_filename}")
     except Exception as e:
-         print(f"Erro ao guardar {output_filename}: {e}")
+        print(f"Erro ao guardar {output_filename}: {e}")
     plt.show()

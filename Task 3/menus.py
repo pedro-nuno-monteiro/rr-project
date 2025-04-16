@@ -1,6 +1,7 @@
 import os
 import matplotlib.pyplot as plt
 
+# ------------------------------------------------------
 def ask_network():
     """!
     @brief Solicita ao user o nome do ficheiro da rede.
@@ -21,6 +22,7 @@ def ask_network():
     if FileNotFoundError: 
         print(f"Arquivo '{novo_ficheiro}' não encontrado. O ficheiro tem de estar na pasta networks. Tente novamente.")
 
+# ------------------------------------------------------
 def ask_origin_destiny(node_mapping):
     
     """!
@@ -42,7 +44,10 @@ def ask_origin_destiny(node_mapping):
     for num, nome in node_mapping.items():
         print(f"{num}: {nome}")
         
-    print("\n---------------------------------------------------------------")
+    print("")
+    print("NOTA: Será aberto um gráfico com a rede, onde poderá ver os nós.")
+    print("      Este gráfico irá fechar-se automaticamente após a escolha dos nós.")
+    print("---------------------------------------------------------------")
     while True:
         try:
             origem = int(input("\nDigite o número do nó de origem: "))
@@ -69,24 +74,23 @@ def clear_screen():
 
 # ------------------------------------------------------
 def ask_which_algorithm():
+
+    clear_screen()
     
+    print("\n-------------- Escolha do nó algoritmo a utilizar ---------------\n")
+    print(" 1. Two Step Approach")
+    print(" 2. Suurbale")
+    print(" 3. Usar ambos os métodos [ainda não implementado]")
 
-  clear_screen()
-  
-  print("\n-------------- Escolha do nó algoritmo a utilizar ---------------")
-  print(" 1. Two Step Approach")
-  print(" 2. Suurbale")
-  print(" 3. Usar ambos os métodos")
+    while True:
+        try:
+            option = int(input("\nDigite a opção pretendida: "))
+            
+            if option in [1, 2, 3]:
+                break
+            else:
+                print("\nNúmero inválido. Por favor, escolha um número da lista.")
+        except ValueError:
+            print("\nNúmero inválido. Por favor, escolha um número da lista.")  
 
-  while True:
-    try:
-      option = int(input("\nDigite a opção pretendida: "))
-        
-      if option in [1, 2, 3]:
-        break
-      else:
-        print("\nNúmero inválido. Por favor, escolha um número da lista.")
-    except ValueError:
-      print("\nNúmero inválido. Por favor, escolha um número da lista.")  
-
-  return option
+    return option
