@@ -114,6 +114,7 @@ while True:
             if algoritmo == 2:
 
                 caminho1, caminho2 = suurballe(G, origem, destino)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo=algoritmo)
             
             if algoritmo == 3:
                 #caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
