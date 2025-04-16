@@ -113,7 +113,7 @@ while True:
 
             if algoritmo == 2:
 
-                caminho1, caminho2 = suurbale(G, origem, destino)
+                caminho1, caminho2 = suurballe(G, origem, destino)
             
             if algoritmo == 3:
                 #caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])

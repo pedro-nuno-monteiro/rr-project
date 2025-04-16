@@ -136,7 +136,7 @@ def find_best_paths(G, origem, destino):
     return path1, cost1, path2, cost2
 
 # ------------------------------------------------------
-def suurbale(G, origem_orig, destino_orig):
+def suurballe(G, origem_orig, destino_orig):
     
     clear_screen()
 
