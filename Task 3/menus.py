@@ -75,6 +75,19 @@ def clear_screen():
 # ------------------------------------------------------
 def ask_which_algorithm():
 
+    """!
+    @brief Exibe um menu para o usuário escolher um algoritmo a ser utilizado.
+
+    Esta função exibe um menu interativo que permite ao usuário escolher entre três opções de algoritmos: "Two Step Approach", "Suurballe" ou uma opção ainda não implementada para usar ambos os métodos. A função valida a entrada do usuário para garantir que a escolha seja uma opção válida.
+
+    @return A opção escolhida pelo usuário como um número inteiro:
+            1 para "Two Step Approach",
+            2 para "Suurballe",
+            3 para "Usar ambos os métodos" (não implementado).
+    
+    @note A opção 3 ainda não está implementada.
+    """
+    
     clear_screen()
     
     print("\n-------------- Escolha do nó algoritmo a utilizar ---------------\n")

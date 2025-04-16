@@ -137,6 +137,19 @@ def find_best_paths(G, origem, destino):
 
 # ------------------------------------------------------
 def suurballe(G, origem_orig, destino_orig):
+    """!
+    @brief Implementa o algoritmo de Suurballe para encontrar dois caminhos disjuntos em um grafo.
+
+    Esta função utiliza o algoritmo de Suurballe para encontrar dois caminhos mais curtos disjuntos entre dois nós de um grafo direcionado. O primeiro caminho é encontrado usando o algoritmo de Dijkstra, e o segundo caminho é calculado após a remoção dos nós pertencentes ao primeiro caminho.
+
+    @param G Grafo direcionado em que os caminhos serão calculados.
+    @param origem_orig Nó de origem no grafo.
+    @param destino_orig Nó de destino no grafo.
+    
+    @return Uma lista contendo dois caminhos: o primeiro caminho mais curto e o segundo caminho mais curto disjunto.
+
+    @note Caso o segundo caminho não exista, o valor retornado será `None` para o segundo caminho.
+    """
     
     clear_screen()
 
@@ -337,9 +350,16 @@ def suurballe(G, origem_orig, destino_orig):
 # ------------------------------------------------------
 def split_nodes(G, source_orig, target_orig):
 
-    """
-    Transforma grafo G dividindo cada nó A em A_in, A_out.
-    Retorna o grafo dividido H, a nova origem s (source_out) e novo destino t (target_in).
+    """!
+    @brief Divide os nós de um grafo em nós de entrada e saída.
+
+    Esta função divide cada nó de um grafo em dois nós: um nó de entrada (no formato `A_in`) e um nó de saída (no formato `A_out`). Ela cria um novo grafo com esses nós divididos e ajusta as arestas entre eles. A origem e o destino também são ajustados para os nós de saída e entrada, respectivamente.
+
+    @param G Grafo direcionado original a ser dividido.
+    @param source_orig Nó de origem no grafo original.
+    @param target_orig Nó de destino no grafo original.
+
+    @return Um grafo direcionado `H` com nós divididos, o novo nó de origem `s` (com sufixo `_out`), e o novo nó de destino `t` (com sufixo `_in`).
     """
     
     # fazemos as alterações num grafo copiado
@@ -389,10 +409,18 @@ def split_nodes(G, source_orig, target_orig):
 
 # ------------------------------------------------------
 def merge_split_path(split_path):
+    """!
+    @brief Converte um caminho do grafo dividido (com nós '_in'/'_out') de volta para os nomes originais dos nós.
+
+    Esta função recebe um caminho que foi gerado a partir de um grafo dividido (onde os nós foram modificados para incluir sufixos '_in' e '_out') e converte esse caminho de volta para os nomes dos nós originais. Ela remove os sufixos '_in' e '_out' e retorna o caminho com os nós originais.
+
+    @param split_path Caminho com os nós divididos (com sufixos '_in' ou '_out').
+
+    @return Um caminho com os nomes dos nós originais, sem os sufixos '_in' ou '_out'.
+    
+    @note Caso o caminho esteja vazio, a função retorna uma lista vazia.
     """
-    Converte um caminho do grafo dividido (com nós _in/_out)
-    de volta para os nomes dos nós originais.
-    """
+    
     if not split_path: return []
     original_path = []
     for node in split_path:
