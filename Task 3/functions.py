@@ -172,14 +172,18 @@ def suurballe(G, origem_orig, destino_orig):
     # --- A partir daqui, usar H, s, t ---
 
     # step 1: find the minimum cost path tree from source s to all other nodes
-    
+
     # path contém todos os caminhos mais curtos desde a origem, s, até todos os restantes nós
-    path = nx.shortest_path(H, source = s, weight = 'cost')
+    try:
+        path = nx.shortest_path(H, source = s, weight = 'cost')
+    except nx.NetworkXNoPath:
+        print(f"Destino t={t} não alcançável a partir de s={s} em H.")
+        return None, None
 
     if t not in path:
         print(f"Destino t={t} não alcançável a partir de s={s} em H.")
         return None, None
-    
+
     # caminho mais curto até ao destino
     P1_split_nodes = path[t] # Caminho P1 no grafo H
     print(f"Step 1: P1 (split) = {P1_split_nodes}")
@@ -187,8 +191,9 @@ def suurballe(G, origem_orig, destino_orig):
 
     # step 2: transform the network, by
     H_residual = H.copy()
+    distance = nx.shortest_path_length(H, source=s, weight='cost')
 
-    # step 2.1: compute the reduced costs for all network arcs, as c'(i, j) = c(i, j) + t(s, i) - t(s, j)
+    # step 2.1: compute the reduced costs and update edge costs in the residual graph as c'(i, j) = c(i, j) + t(s, i) - t(s, j)
     # para cada arco, calculamos o custo reduzido c'(i, j)
     # para isso, temos
     # # c_ij que é o custo do arco entre i e j
@@ -196,137 +201,81 @@ def suurballe(G, origem_orig, destino_orig):
     # # t_s_j que é o custo do nó j (posterior)
 
     # distance é um dicionário que contem o custa da distância da origem a cada nó
-    distance = nx.shortest_path_length(H, source = s, weight = 'cost')
-
-    # u e v representam o nó anterior e o nó posterior, respectivamente
+    
     for u, v, data in H.edges(data=True):
-        c_ij = data.get('cost', 1)
+        cost = data.get('cost', 1)
         t_s_i = distance.get(u, float('inf'))
         t_s_j = distance.get(v, float('inf'))
-        if t_s_i == float('inf') or t_s_j == float('inf'):
-            c_prime = float('inf')
-        else:
-            c_prime = c_ij + t_s_i - t_s_j
-            c_prime = max(0, c_prime) # Garante que o custo não seja negativo
-
-        if H_residual.has_edge(u, v):
-            H_residual[u][v]['cost'] = c_prime
-
-    # a partir daqui, o grafo residual tem, para "path", custos de arcos a 0
-    # e para as restantes arestas, o custo reduzido
+        if t_s_i != float('inf') and t_s_j != float('inf'):
+            c_prime = cost + t_s_i - t_s_j
+            if H_residual.has_edge(u, v):
+                H_residual[u][v]['cost'] = c_prime
+        elif H_residual.has_edge(u, v):
+            H_residual[u][v]['cost'] = float('inf') # Se um dos nós não é alcançável
 
     draw_suurballe(H_residual, s, t, None, None, "Step 2.1 - Custos Reduzidos")
 
-    # step 2.2: remove all the arcs on the shortest path that are towards the source
-    print("Step 2.2: Removendo arcos de P1 em direção à origem...")
-    removed_count_2_2 = 0
+    # step 2.2: reverse the arcs on the shortest path P1
     P1_split_edges = list(zip(P1_split_nodes[:-1], P1_split_nodes[1:]))
-
-    for u, v in P1_split_edges:
-        # Check if there's a reverse edge in the residual graph
-        if H_residual.has_edge(v, u):
-            print(f"Removendo arco reverso ({v}, {u})")
-            H_residual.remove_edge(v, u)
-            removed_count_2_2 += 1
-        
-        # Also check for edges that could lead back to source through split nodes
-        u_base = u.rsplit('_', 1)[0]
-        v_base = v.rsplit('_', 1)[0]
-        u_in = f"{u_base}_in"
-        u_out = f"{u_base}_out"
-        v_in = f"{v_base}_in"
-        v_out = f"{v_base}_out"
-        
-        # Remove any reverse connections through split nodes
-        if H_residual.has_edge(v_out, u_in):
-            print(f"Removendo arco split reverso ({v_out}, {u_in})")
-            H_residual.remove_edge(v_out, u_in)
-            removed_count_2_2 += 1
-
-    print(f"Removidos {removed_count_2_2} arcos.")
-
-    draw_suurballe(H_residual, s, t, None, None, "Step 2.2 - Arcos Removidos")
-
-    # step 2.3: reverse the direction for the arcs on the shortest path (all of null cost)
-    print("Step 2.3: Revertendo arcos de P1 com custo 0...")
-    removed_count_2_3 = 0
-    added_count_2_3 = 0
     for u, v in P1_split_edges:
         if H_residual.has_edge(u, v):
+            cost = H_residual[u][v].get('cost', 0) # Custo original (pode ser zero após redução)
             H_residual.remove_edge(u, v)
-            removed_count_2_3 += 1
-        H_residual.add_edge(v, u, cost = 0) # Adiciona (v, u) com cost = 0
-        added_count_2_3 += 1
-    print(f"Removidos {removed_count_2_3} arcos, adicionados {added_count_2_3} arcos invertidos.")
+            H_residual.add_edge(v, u, cost=-cost) # Custo negativo para indicar o reverso
 
-    draw_suurballe(H_residual, s, t, None, None, "Step 2.3 - Arcos Invertidos")
+    print("Step 2.2: Revertendo arcos de P1...")
+    draw_suurballe(H_residual, s, t, P1_split_nodes, None, "Step 2.2 - Arcos Invertidos")
 
-    # step 3. find a new minimum-cost path from s to d in the changed network
+    # step 3. find a new minimum-cost path from s to t in the transformed network
     print("Step 3: Procurando P2 no grafo transformado H_residual...")
-    
     try:
-
-        # encontrar novo caminho mais curto entre s e t
-        P2_split_nodes = nx.shortest_path(H_residual, source = s, target = t, weight = 'cost')
+        P2_split_nodes = nx.shortest_path(H_residual, source=s, target=t, weight='cost')
         print(f"Step 3: P2 (split) = {P2_split_nodes}")
         draw_suurballe(H_residual, s, t, P1_split_nodes, P2_split_nodes, "Step 3 - Com 2.º Caminho")
-    
     except nx.NetworkXNoPath:
         print("Não foi encontrado um segundo caminho disjunto (Step 3).")
-        # Apenas P1 existe. Faz merge e retorna.
-        path1_final_merged = merge_split_path(P1_split_nodes)
-        return path1_final_merged, None
-    
+        return merge_split_path(P1_split_nodes), None
     except Exception as e:
         print(f"Erro no Step 3 (Shortest Path em H_residual): {e}")
-        path1_final_merged = merge_split_path(P1_split_nodes)
-        return path1_final_merged, None # Fallback para P1
+        return merge_split_path(P1_split_nodes), None
 
-    # step 4. remove the common arcs with opposite directions in the computed paths. 
+    # step 4. remove the common arcs with opposite directions in the computed paths.
     # the remaining arcs form two minimum-cost disjoint paths.
     print("Step 4: Removendo sobreposições e reconstruindo...")
-    P1_edges_set = set(P1_split_edges) # Já calculado: arestas (u,v) de P1
-    P2_edges_set = set(zip(P2_split_nodes[:-1], P2_split_nodes[1:])) # Arestas (x,y) de P2
+    P1_edges = list(zip(P1_split_nodes[:-1], P1_split_nodes[1:]))
+    P2_edges = list(zip(P2_split_nodes[:-1], P2_split_nodes[1:]))
 
-    edges_to_remove_from_P1 = set() # Arestas (u,v) de P1 cujo reverso (v,u) está em P2
-    for u, v in P1_edges_set:
-        if (v, u) in P2_edges_set:
-            edges_to_remove_from_P1.add((u, v))
-    print(f"Detectadas {len(edges_to_remove_from_P1)} sobreposições.")
+    path1_final_nodes = list(P1_split_nodes)
+    path2_final_nodes = list(P2_split_nodes)
 
-    # Constrói listas finais de arestas (ainda com nós divididos)
-    final_P1_split_edges = [(u,v) for u,v in P1_edges_set if (u,v) not in edges_to_remove_from_P1]
-    final_P2_split_edges = [(u,v) for u,v in P2_edges_set if (v,u) not in edges_to_remove_from_P1]
+    i = 0
+    while i < len(path1_final_nodes) - 1:
+        u1, v1 = path1_final_nodes[i], path1_final_nodes[i+1]
+        j = 0
+        while j < len(path2_final_nodes) - 1:
+            u2, v2 = path2_final_nodes[j], path2_final_nodes[j+1]
+            if u1 == v2 and v1 == u2:  # Found an opposite arc
+                del path1_final_nodes[i:i+2]
+                if j + 1 < len(path2_final_nodes):
+                    del path2_final_nodes[j:j+2]
+                else:
+                    del path2_final_nodes[j:j+1] # Handle case where P2 ends at the reverse arc
+                # Restart the inner loop as paths have changed
+                i = 0
+                j = 0
+                continue
+            j += 1
+        i += 1
 
-    # Reconstrução dos caminhos (ainda com nós divididos)
-    path1_final_split = []
-    path2_final_split = []
-    G_path1_split = nx.DiGraph(final_P1_split_edges)
-    G_path2_split = nx.DiGraph(final_P2_split_edges)
+    print(f"Step 4: P1 final (split) após remoção = {path1_final_nodes}")
+    print(f"Step 4: P2 final (split) após remoção = {path2_final_nodes}")
 
-    try: # Reconstroi P1 final
-        if s not in G_path1_split: G_path1_split.add_node(s)
-        if t not in G_path1_split: G_path1_split.add_node(t)
-        if G_path1_split.number_of_edges() > 0 or (s == t and G_path1_split.has_node(s)):
-            path1_final_split = nx.shortest_path(G_path1_split, s, t)
-    except (nx.NetworkXNoPath, nx.NodeNotFound): path1_final_split = []
-
-    try: # Reconstroi P2 final
-        if s not in G_path2_split: G_path2_split.add_node(s)
-        if t not in G_path2_split: G_path2_split.add_node(t)
-        if G_path2_split.number_of_edges() > 0 or (s == t and G_path2_split.has_node(s)):
-            path2_final_split = nx.shortest_path(G_path2_split, s, t)
-    except (nx.NetworkXNoPath, nx.NodeNotFound): path2_final_split = []
-
-    print(f"Step 4: P1 final reconstruído (split) = {path1_final_split}")
-    print(f"Step 4: P2 final reconstruído (split) = {path2_final_split}")
-
-    draw_suurballe(H_residual, s, t, path1_final_split, path2_final_split, "Step 4 - FinalSplitPaths")
+    draw_suurballe(H_residual, s, t, path1_final_nodes, path2_final_nodes, "Step 4 - FinalSplitPaths")
 
     # --- PASSO FINAL: Merge para Nós Originais ---
     print("--- Merge final para nós originais ---")
-    final_path1_merged = merge_split_path(path1_final_split)
-    final_path2_merged = merge_split_path(path2_final_split)
+    final_path1_merged = merge_split_path(path1_final_nodes)
+    final_path2_merged = merge_split_path(path2_final_nodes)
 
     # Trata casos de caminhos vazios ou idênticos após merge
     if not final_path1_merged and final_path2_merged:
@@ -334,7 +283,6 @@ def suurballe(G, origem_orig, destino_orig):
         final_path1_merged, final_path2_merged = final_path2_merged, None
     elif not final_path1_merged and not final_path2_merged:
         print("Erro: Ambos os caminhos finais estão vazios.")
-        # Se P1 original existia, retorna-o como fallback?
         return merge_split_path(P1_split_nodes) if P1_split_nodes else None, None
 
     if final_path1_merged and final_path2_merged and final_path1_merged == final_path2_merged:
