@@ -168,7 +168,7 @@ def suurballe(G, origem_orig, destino_orig):
         print("Não há caminho inicial.")
         return None, None
     
-    draw_suurballe(G, origem_orig, destino_orig, P1_original, None, "Step 0 - Primeiro Caminho Original")
+    draw_suurballe(G, origem_orig, destino_orig, P1_original, None, "Step 0 - 1º Caminho Original")
     
     H, s, t = split_nodes(G, origem_orig, destino_orig, path=P1_original)
 
@@ -190,7 +190,7 @@ def suurballe(G, origem_orig, destino_orig):
     # caminho mais curto até ao destino
     P1_split_nodes = path[t] # Caminho P1 no grafo H
     print(f"Step 1: P1 (split) = {P1_split_nodes}")
-    draw_suurballe(H, s, t, P1_split_nodes, None, "Step 1 - 1º Caminho mais curto")
+    draw_suurballe(H, s, t, P1_split_nodes, None, "Step 1 - 1º Caminho com node splitting")
 
     # step 2: transform the network, by
     H_residual = H.copy()

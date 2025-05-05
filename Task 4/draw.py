@@ -56,6 +56,14 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo
 
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
+    # Adiciona um título baseado no algoritmo
+    if algoritmo == 1:
+        plt.title("Visualização do Algoritmo Two Step Approach")
+    elif algoritmo == 2:
+        plt.title("Visualização do Algoritmo Suurballe")
+
+    plt.tight_layout()  # Ajusta a disposição dos subplots para evitar sobreposição
+
     # Desenha todas as arestas a vermelho
     nx.draw_networkx_edges(G, pos, edge_color='red', alpha=0.3, width=1)
 
@@ -89,20 +97,13 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo
 
     plt.box(False)
 
+
     # Criar objetos para a legenda
-    if algoritmo == 1:
-        legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto")
-        legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
-        legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
-        legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach")
-    
-    elif algoritmo == 2:
-        legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto")
-        legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
-        legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
-        legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="Suurballe")
-    
-    
+    legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto")
+    legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
+    legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
+    legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="2º Caminho Mais Curto")
+        
     
     plt.legend(handles=[legend_caminho1, legend_caminho2, legend_inicio, legend_fim], loc='upper right')
 
@@ -227,8 +228,8 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
 
     # Legenda adaptada
     legend_items = []
-    if caminho1_split: legend_items.append(plt.Line2D([], [], color='green', linewidth=3, label="Caminho 1 (Split)"))
-    if caminho2_split: legend_items.append(plt.Line2D([], [], color='blue', linewidth=3, label="Caminho 2 (Split)"))
+    if caminho1_split: legend_items.append(plt.Line2D([], [], color='green', linewidth=3, label="Caminho 1"))
+    if caminho2_split: legend_items.append(plt.Line2D([], [], color='blue', linewidth=3, label="Caminho 2"))
     legend_items.extend([
         plt.Line2D([], [], color='silver', linestyle='dashed', linewidth=1, label="Aresta Interna"),
         plt.Line2D([], [], color='gray', linestyle='solid', linewidth=1, label="Outra Aresta"),
