@@ -160,14 +160,17 @@ def suurballe(G, origem_orig, destino_orig):
     print("")
     print("- NOTA: Para passar ao passo seguinte, é necessário fechar o gráfico atual.")
 
-    # --- PASSO 0: Node Splitting ---
-    # H - grafo com node splitting
-    # s - origem (source_out) no grafo dividido
-    # t - destino (target_in) no grafo dividido
-    H, s, t = split_nodes(G, origem_orig, destino_orig)
-    print(f"\nOrigem, s = {s} até destino, t = {t}")
-
-    draw_suurballe(H, s, t, None, None, "Step 0 - Node Splitting")
+    # --- PASSO MODIFICADO: Primeiro calcula P1 no grafo original ---
+    try:
+        # PASSO 0: Encontrar o primeiro caminho no grafo ORIGINAL
+        P1_original = nx.shortest_path(G, source=origem_orig, target=destino_orig, weight='cost')
+    except nx.NetworkXNoPath:
+        print("Não há caminho inicial.")
+        return None, None
+    
+    draw_suurballe(G, origem_orig, destino_orig, P1_original, None, "Step 0 - Primeiro Caminho Original")
+    
+    H, s, t = split_nodes(G, origem_orig, destino_orig, path=P1_original)
 
     # --- A partir daqui, usar H, s, t ---
 
@@ -213,7 +216,7 @@ def suurballe(G, origem_orig, destino_orig):
         elif H_residual.has_edge(u, v):
             H_residual[u][v]['cost'] = float('inf') # Se um dos nós não é alcançável
 
-    draw_suurballe(H_residual, s, t, None, None, "Step 2.1 - Custos Reduzidos")
+    draw_suurballe(H_residual, s, t, P1_split_nodes, None, "Step 2.1 - Custos Reduzidos")
 
     # step 2.2: reverse the arcs on the shortest path P1
     P1_split_edges = list(zip(P1_split_nodes[:-1], P1_split_nodes[1:]))
@@ -234,10 +237,10 @@ def suurballe(G, origem_orig, destino_orig):
         draw_suurballe(H_residual, s, t, P1_split_nodes, P2_split_nodes, "Step 3 - Com 2.º Caminho")
     except nx.NetworkXNoPath:
         print("Não foi encontrado um segundo caminho disjunto (Step 3).")
-        return merge_split_path(P1_split_nodes), None
+        return merge_split_path(P1_original), None
     except Exception as e:
         print(f"Erro no Step 3 (Shortest Path em H_residual): {e}")
-        return merge_split_path(P1_split_nodes), None
+        return merge_split_path(P1_original), None
 
     # step 4. remove the common arcs with opposite directions in the computed paths.
     # the remaining arcs form two minimum-cost disjoint paths.
@@ -270,7 +273,7 @@ def suurballe(G, origem_orig, destino_orig):
     print(f"Step 4: P1 final (split) após remoção = {path1_final_nodes}")
     print(f"Step 4: P2 final (split) após remoção = {path2_final_nodes}")
 
-    draw_suurballe(H_residual, s, t, path1_final_nodes, path2_final_nodes, "Step 4 - FinalSplitPaths")
+    #draw_suurballe(H_residual, s, t, path1_final_nodes, path2_final_nodes, "Step 4 - FinalSplitPaths")
 
     # --- PASSO FINAL: Merge para Nós Originais ---
     print("--- Merge final para nós originais ---")
@@ -296,7 +299,7 @@ def suurballe(G, origem_orig, destino_orig):
     return final_path1_merged, final_path2_merged
 
 # ------------------------------------------------------
-def split_nodes(G, source_orig, target_orig):
+def split_nodes(G, source_orig, target_orig, path=None):
 
     """!
     @brief Divide os nós de um grafo em nós de entrada e saída.
@@ -316,27 +319,33 @@ def split_nodes(G, source_orig, target_orig):
     # Mapeia nome original -> (nome_in, nome_out)
     new_mapping = {} 
 
+    nodes_to_split = set(path) if path else set()
+
     # --- Cria nós divididos e arestas internas ---
     for node in G.nodes():
-        node_in = f"{node}_in"
-        node_out = f"{node}_out"
-        new_mapping[node] = (node_in, node_out)
-        H.add_node(node_in)
-        H.add_node(node_out)
+        if node in nodes_to_split:
+            node_in = f"{node}_in"
+            node_out = f"{node}_out"
+            new_mapping[node] = (node_in, node_out)
+            H.add_node(node_in)
+            H.add_node(node_out)
 
-        # acrescenta null cost arc
-        H.add_edge(node_in, node_out, cost = 0)
+            # acrescenta null cost arc
+            H.add_edge(node_in, node_out, cost = 0)
+        else:
+            H.add_node(node)
+            new_mapping[node] = (node, node)
 
     # --- Recria arestas originais ---
     for u, v, data in G.edges(data=True):
-        u_out = new_mapping[u][1] # u_out
-        v_in = new_mapping[v][0]  # v_in
+        u_out = new_mapping[u][1] if u in nodes_to_split else u # u_out
+        v_in = new_mapping[v][0]  if v in nodes_to_split else v # v_in
         original_cost = data.get('cost', 1)
         H.add_edge(u_out, v_in, cost=original_cost)
 
     # --- Define s e t no grafo dividido ---
-    s = new_mapping[source_orig][1] # source_out
-    t = new_mapping[target_orig][0] # target_in
+    s = new_mapping[source_orig][1] if source_orig in nodes_to_split else source_orig # source_out
+    t = new_mapping[target_orig][0] if target_orig in nodes_to_split else target_orig # target_in
 
     # Garante que s e t existem (caso isolados)
     if not H.has_node(s): H.add_node(s)
