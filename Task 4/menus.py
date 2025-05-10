@@ -53,6 +53,10 @@ def ask_origin_destiny(node_mapping):
             origem = int(input("\nDigite o número do nó de origem: "))
             destino = int(input("Digite o número do nó de destino: "))
             
+            if origem == destino:
+                print("\nO nó de origem e o nó de destino não podem ser iguais. Tente novamente.")
+                continue
+            
             if origem in node_mapping and destino in node_mapping:
                 break
             else:
