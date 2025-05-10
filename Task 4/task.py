@@ -82,6 +82,7 @@ while True:
             origem, destino = ask_origin_destiny(node_mapping)
 
             algoritmo = ask_which_algorithm()
+            clear_screen()
 
             if algoritmo == 1:
 
@@ -96,7 +97,7 @@ while True:
                 @return custo2 Custo do segundo caminho.
                 """
                 # encontrar os caminhos mais curtos
-                caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino)
+                caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
 
                 """!
                 @brief Desenha o grafo com os caminhos encontrados.
@@ -109,23 +110,19 @@ while True:
                 @param caminho3 Caminho Suurbale.
                 """
                 # desenhar o grafo
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo=algoritmo)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None, algoritmo=algoritmo)
 
             if algoritmo == 2:
 
-                caminho1, caminho2 = suurballe(G, origem, destino)
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo=algoritmo)
+                caminho1, caminho2 = suurballe(G, origem, destino, algoritmo=algoritmo)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None,  algoritmo=algoritmo)
             
             if algoritmo == 3:
-                #caminho1, custo1, caminho2, custo2 = find_best_paths(G, node_mapping[origem], node_mapping[destino])
-                #caminho1, caminho3 = suurbale(G, node_mapping[origem], node_mapping[destino])
-                #if caminho3 == None:
-                #    print("Não foi possível encontrar caminho disjunto.")
-                #    draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=None, algoritmo=algoritmo)
-                #else:
-                #    draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3=caminho3, algoritmo=algoritmo)
-                print("\nDesculpe, ainda não está implementado.")
-                input("Pressione Enter para continuar...")
+                
+                caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
+                caminho1, caminho3 = suurballe(G, origem, destino, algoritmo=algoritmo)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 , algoritmo=algoritmo)
+
     
     elif escolha == 5:
         clear_screen()

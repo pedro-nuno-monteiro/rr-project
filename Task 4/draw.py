@@ -3,112 +3,100 @@ import matplotlib.pyplot as plt
 import math
 import matplotlib.lines as mlines
 
-def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, algoritmo):
-    """!
-    @brief Desenha o grafo da rede, destacando os caminhos e nós importantes.
-
-    Esta função gera uma visualização gráfica do grafo, destacando o caminho mais curto entre o nó de origem e o nó de destino. Além disso, permite destacar dois caminhos diferentes (caso existam) e colorir os nós de origem e destino de forma distinta. O algoritmo usado para encontrar os caminhos pode ser especificado.
-
-    @param G O grafo direcionado a ser desenhado.
-    @param node_mapping Mapa de nós, associando índices aos nomes dos nós no grafo.
-    @param origem Índice do nó de origem, que será destacado na visualização.
-    @param destino Índice do nó de destino, que será destacado na visualização.
-    @param caminho1 Lista de nós que representam o primeiro caminho a ser destacado.
-    @param caminho2 Lista de nós que representam o segundo caminho a ser destacado (pode ser None).
-    @param algoritmo Inteiro indicando o algoritmo utilizado:
-        1. "Two Step Approach"
-        2. "Suurballe"
-
-    @note A função gera uma imagem do grafo e a salva no diretório de saída como "rede_final.png".
+def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3, algoritmo):
     """
+    Desenha o grafo destacando até três caminhos e os nós de origem e destino.
 
-    # Obtém as coordenadas dos nós do grafo
+    @param G: Grafo direcionado.
+    @param node_mapping: Dicionário {índice: nome_do_nó}.
+    @param origem: Índice ou nome do nó de origem.
+    @param destino: Índice ou nome do nó de destino.
+    @param caminho1: Lista de nós do primeiro caminho (mais curto).
+    @param caminho2: Lista de nós do segundo caminho (Two-Step).
+    @param caminho3: Lista de nós do terceiro caminho (Suurballe).
+    @param algoritmo: Inteiro que indica o algoritmo:
+                      1 - Two Step Approach
+                      2 - Suurballe
+                      3 - Todos os três caminhos
+    """
+    import matplotlib.pyplot as plt
+    import networkx as nx
+    import matplotlib.lines as mlines
+
     pos = nx.get_node_attributes(G, 'pos')
-
-    # Cria rótulos no formato "1: Nome"
     labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
 
-    origem_nome = None
-    if isinstance(origem, int) and origem in node_mapping:
-        origem_nome = node_mapping[origem]
-    elif isinstance(origem, str) and origem in G.nodes():
-        origem_nome = origem
-    else:
-        # Se não for int válido nem str válido, lança erro
-        raise ValueError(f"Nó de origem '{origem}' inválido ou não encontrado.")
+    origem_nome = node_mapping.get(origem, origem)
+    destino_nome = node_mapping.get(destino, destino)
 
-    destino_nome = None
-    if isinstance(destino, int) and destino in node_mapping:
-        destino_nome = node_mapping[destino]
-    elif isinstance(destino, str) and destino in G.nodes():
-        destino_nome = destino
-    else:
-        # Se não for int válido nem str válido, lança erro
-        raise ValueError(f"Nó de destino '{destino}' inválido ou não encontrado.")
+    if origem_nome not in G.nodes:
+        raise ValueError(f"Nó de origem '{origem_nome}' não encontrado no grafo.")
+    if destino_nome not in G.nodes:
+        raise ValueError(f"Nó de destino '{destino_nome}' não encontrado no grafo.")
 
-    # Define as cores dos nós
     node_colors = {
         nome: 'green' if nome == origem_nome else
-                'red' if nome == destino_nome else
-                'lightblue'
+              'red' if nome == destino_nome else
+              'lightblue'
         for nome in G.nodes
     }
 
+    plt.figure(figsize=(10, 7))
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
-    # Adiciona um título baseado no algoritmo
-    if algoritmo == 1:
-        plt.title("Visualização do Algoritmo Two Step Approach")
-    elif algoritmo == 2:
-        plt.title("Visualização do Algoritmo Suurballe")
+    # Desenha todas as arestas com opacidade
+    nx.draw_networkx_edges(G, pos, edge_color='gray', alpha=0.2, width=1)
 
-    plt.tight_layout()  # Ajusta a disposição dos subplots para evitar sobreposição
+    # Primeiro caminho (mais curto) - verde
+    if caminho1:
+        path_edges1 = list(zip(caminho1, caminho1[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3)
 
-    # Desenha todas as arestas a vermelho
-    nx.draw_networkx_edges(G, pos, edge_color='red', alpha=0.3, width=1)
-
-    # Pinta primeiro caminho (verde)
-    path_edges1 = list(zip(caminho1, caminho1[1:]))
-    nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3)
-
-    # Pinta segundo caminho (azul), se existir
+    # Segundo caminho (Two-Step) - azul
     if caminho2:
         path_edges2 = list(zip(caminho2, caminho2[1:]))
         nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3)
-        
-    # Adiciona rótulos para os custos das arestas
+
+    # Terceiro caminho (Suurballe) - roxo
+    if caminho3:
+        path_edges3 = list(zip(caminho3, caminho3[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, edge_color='purple', width=3)
+
+    # Rótulos dos custos das arestas
     edge_labels = {}
     for u, v, d in G.edges(data=True):
-        edge_labels[(u, v)] = f"{d['cost']}"
-        if edge_labels[(u, v)] == "0.0":
-            edge_labels[(u, v)] = "1.0"
-
-    # será colocar 2 arcos em vez de ter 1 bidirecional
-    # assim 1 fica com 0 e outro com o valor do custo
+        label = str(d.get('cost', 1.0))
+        edge_labels[(u, v)] = "1.0" if label == "0.0" else label
 
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8, font_color='blue')
 
-    # Desenha os rótulos dentro de retângulos coloridos
+    # Rótulos dos nós
     for nome, (x, y) in pos.items():
         label_text = labels.get(nome, nome)
         plt.text(x, y, label_text, fontsize=8, fontweight='bold',
-                bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
-                horizontalalignment='center', verticalalignment='center')
+                 bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
+                 horizontalalignment='center', verticalalignment='center')
 
+    # Legenda
+    legenda = [
+        mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto"),
+        mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem"),
+        mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
+    ]
+
+    if algoritmo == 1:
+        legenda.append(mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach"))
+    elif algoritmo == 2:
+        legenda.append(mlines.Line2D([], [], color='blue', linewidth=3, label="Suurballe"))
+    elif algoritmo == 3:
+        legenda.extend([
+            mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach"),
+            mlines.Line2D([], [], color='purple', linewidth=3, label="Suurballe")
+        ])
+
+    plt.legend(handles=legenda, loc='upper right')
     plt.box(False)
-
-
-    # Criar objetos para a legenda
-    legend_caminho1 = mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto")
-    legend_inicio = mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem")
-    legend_fim = mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
-    legend_caminho2 = mlines.Line2D([], [], color='blue', linewidth=3, label="2º Caminho Mais Curto")
-        
-    
-    plt.legend(handles=[legend_caminho1, legend_caminho2, legend_inicio, legend_fim], loc='upper right')
-
     plt.savefig("output/rede_final.png", dpi=300)
-    
     plt.show()
 
 # ------------------------------------------------------

@@ -83,7 +83,7 @@ def ask_which_algorithm():
     @return A opção escolhida pelo usuário como um número inteiro:
             1 para "Two Step Approach",
             2 para "Suurballe",
-            3 para "Usar ambos os métodos" (não implementado).
+            3 para "Usar ambos os métodos".
     
     @note A opção 3 ainda não está implementada.
     """
@@ -93,7 +93,7 @@ def ask_which_algorithm():
     print("\n-------------- Escolha do nó algoritmo a utilizar ---------------\n")
     print(" 1. Two Step Approach")
     print(" 2. Suurbale")
-    print(" 3. Usar ambos os métodos [ainda não implementado]")
+    print(" 3. Usar ambos os métodos")
 
     while True:
         try:
