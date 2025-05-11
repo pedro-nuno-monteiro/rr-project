@@ -3,7 +3,7 @@ from menus import *
 from draw import *
 
 """!
-@file task3.py
+@file task4.py
 @mainpage Two Step Approach
 @brief Programa para exibir gráficos de rede, implementando o Two Step Approach, para encontrar um par de caminhos disjuntos.
 
@@ -115,7 +115,7 @@ while True:
             if algoritmo == 2:
 
                 caminho1, caminho2 = suurballe(G, origem, destino, algoritmo=algoritmo)
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None,  algoritmo=algoritmo)
+                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None, algoritmo=algoritmo)
             
             if algoritmo == 3:
                 
@@ -123,13 +123,11 @@ while True:
                 caminho1, caminho3 = suurballe(G, origem, destino, algoritmo=algoritmo)
                 draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 , algoritmo=algoritmo)
 
-    
     elif escolha == 5:
         clear_screen()
-        print("Obrigada! Volte Sempre!")
+        print("Obrigad@! Volte Sempre!")
         break
 
     else:
         clear_screen()
         print("Número inválido. Por favor, escolha um número da lista.")
-        

@@ -15,29 +15,27 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
     @param caminho2: Lista de nós do segundo caminho (Two-Step).
     @param caminho3: Lista de nós do terceiro caminho (Suurballe).
     @param algoritmo: Inteiro que indica o algoritmo:
-                      1 - Two Step Approach
-                      2 - Suurballe
-                      3 - Todos os três caminhos
+        1 - Two Step Approach
+        2 - Suurballe
+        3 - Todos os três caminhos
     """
-    import matplotlib.pyplot as plt
-    import networkx as nx
-    import matplotlib.lines as mlines
 
     pos = nx.get_node_attributes(G, 'pos')
     labels = {nome: f"{num}: {nome}" for num, nome in node_mapping.items()}
 
+    # nomes dos nós de origem e destino
     origem_nome = node_mapping.get(origem, origem)
     destino_nome = node_mapping.get(destino, destino)
 
     if origem_nome not in G.nodes:
-        raise ValueError(f"Nó de origem '{origem_nome}' não encontrado no grafo.")
+        raise ValueError(f"O nó de origem '{origem_nome}' não está no grafo.")
     if destino_nome not in G.nodes:
-        raise ValueError(f"Nó de destino '{destino_nome}' não encontrado no grafo.")
+        raise ValueError(f"O nó de destino '{destino_nome}' não está no grafo.")
 
     node_colors = {
         nome: 'green' if nome == origem_nome else
-              'red' if nome == destino_nome else
-              'lightblue'
+            'red' if nome == destino_nome else
+            'lightblue'
         for nome in G.nodes
     }
 
@@ -74,8 +72,8 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
     for nome, (x, y) in pos.items():
         label_text = labels.get(nome, nome)
         plt.text(x, y, label_text, fontsize=8, fontweight='bold',
-                 bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
-                 horizontalalignment='center', verticalalignment='center')
+                bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
+                horizontalalignment='center', verticalalignment='center')
 
     # Legenda
     legenda = [
@@ -96,7 +94,7 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
 
     plt.legend(handles=legenda, loc='upper right')
     plt.box(False)
-    plt.savefig("output/rede_final.png", dpi=300)
+    plt.savefig("output/Rede Final.png", dpi=300)
     plt.show()
 
 # ------------------------------------------------------
@@ -135,7 +133,7 @@ def draw_empty_network(G, node_mapping):
     # Exibe o gráfico
     plt.show(block=False)
 
-    plt.savefig("output/rede_original.png", dpi=300)
+    plt.savefig("output/Rede Original.png", dpi=300)
     
     return plt
 
@@ -163,7 +161,7 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     # Obtém posições diretamente do grafo G (devem ter sido adicionadas antes)
     pos = nx.get_node_attributes(G, 'pos')
     if not pos:
-        print(f"Aviso em draw_graph_5 para {filename}: Atributo 'pos' não encontrado. Usando layout spring.")
+        print(f"Aviso na função draw_suurballe para {filename}: Atributo 'pos' não encontrado. Usando layout spring.")
         pos = nx.spring_layout(G) # Fallback
 
     # Cria rótulos diretamente dos nomes dos nós
