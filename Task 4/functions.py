@@ -235,15 +235,38 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     
     # 2.2: Inverter arcos de P1
     if algoritmo == 2: 
-        print("Step 2.2 e 2.3: Remover e Inverter Arcos de P1")
+        print("Step 2.2: Remover arcos de P1 direcionados para a origem")
+        print("Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
+    
     P1_edges = list(zip(P1_split[:-1], P1_split[1:]))
-    for u, v in P1_edges:
-        if H_residual.has_edge(u, v):
-            cost = H_residual[u][v]['cost']
-            H_residual.remove_edge(u, v)
-            H_residual.add_edge(v, u, cost=-cost)
+    print(f"Arcos de P1: {P1_edges}")
+        
+    # Step 2.2: Remove arcs that point towards source
+    # We process edges in reverse order (from destination to source)
+    node_pairs = list(zip(P1_split[:-1], P1_split[1:]))  # Get original edges
+    for u, v in node_pairs:
+        base_u = u.rsplit('_', 1)[0]  # Get base node name without _in/_out
+        base_v = v.rsplit('_', 1)[0]
+        # Remove edge from v to u (the reverse direction)
+        reverse_u = f"{base_v}_out"
+        reverse_v = f"{base_u}_in"
+        if H_residual.has_edge(reverse_u, reverse_v):
+            H_residual.remove_edge(reverse_u, reverse_v)
+    
     if algoritmo == 2:
-        draw_suurballe(H_residual, s, t, None, None, "Step 2.2 e 2.3 - Arcos Removidos e Invertidos")
+        draw_suurballe(H_residual, s, t, None, None, "Step 2.2 - Arcos Removidos ")
+
+    # Step 2.3: Reverse remaining arcs (those pointing towards destination)
+    for i in range(len(P1_split)-1):
+        u, v = P1_split[i], P1_split[i+1]  # Edge pointing towards destination
+        if H_residual.has_edge(u, v):
+            # Remove original edge and add reversed edge with cost 0
+            H_residual.remove_edge(u, v)
+            H_residual.add_edge(v, u, cost=0)
+
+    if algoritmo == 2:
+        print("Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
+        draw_suurballe(H_residual, s, t, None, None, "Step 2.3 - Arcos Invertidos")
     
     # --- Step 3: Encontrar P2 no grafo residual ---
     if algoritmo == 2:
@@ -280,6 +303,9 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
             opposite_edges.add((u, v))
             opposite_edges.add((v, u))
     
+    print(f"Arcos em comum: {opposite_edges}")
+    input("enter")
+
     if algoritmo == 2:
         if opposite_edges:
             print(f"Arcos em comum: {opposite_edges}")

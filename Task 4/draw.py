@@ -94,6 +94,7 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
 
     plt.legend(handles=legenda, loc='upper right')
     plt.box(False)
+    plt.title(f"Rede Final")
     plt.savefig("output/Rede Final.png", dpi=300)
     plt.show()
 
@@ -179,7 +180,7 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     internal_edges = [(u,v) for u, v in G.edges() if u.endswith('_in') and v.endswith('_out') and u.rsplit('_',1)[0] == v.rsplit('_',1)[0]]
     other_edges = [e for e in G.edges() if e not in internal_edges]
 
-    nx.draw_networkx_edges(G, pos, edgelist=other_edges, edge_color='gray', alpha=0.5, width=1, arrows=True, arrowsize=15, connectionstyle='arc3, rad=0.05')
+    nx.draw_networkx_edges(G, pos, edgelist=other_edges, edge_color='black', alpha=0.8, width=1.5, arrows=True, arrowsize=20, connectionstyle='arc3, rad=0.05')
     nx.draw_networkx_edges(G, pos, edgelist=internal_edges, edge_color='silver', style='dashed', alpha=0.6, width=1, arrows=True, arrowsize=15)
 
     # Adiciona rótulos das arestas (atributo 'cost')
@@ -194,18 +195,19 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels,
                                 font_size=7, font_color='darkblue',
                                 label_pos=0.4,
+                                connectionstyle='arc3, rad=0.1',
                                 bbox=dict(facecolor='white', alpha=0.4, edgecolor='none', boxstyle='round,pad=0.1'))
 
     # Destaca caminho 1 (verde)
     if caminho1_split:
         path_edges1 = list(zip(caminho1_split, caminho1_split[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3, arrows=True, arrowsize=20, style='solid')
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3, arrows=True, arrowsize=20, style='solid', connectionstyle='arc3, rad=0.05')
 
     # Destaca caminho 2 (azul)
     if caminho2_split:
         path_edges2 = list(zip(caminho2_split, caminho2_split[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3, arrows=True, arrowsize=20, style='solid')
-
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3, arrows=True, arrowsize=20, style='solid', connectionstyle='arc3, rad=0.05')
+    
     # Desenha Nós
     nx.draw_networkx_nodes(G, pos, node_size=350, node_color=[node_colors.get(n, 'gray') for n in G.nodes()])
 
@@ -225,7 +227,7 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     ])
     plt.legend(handles=legend_items, loc='best', fontsize='small')
 
-    plt.title(f"Suurballe Step: {filename}")
+    plt.title(f"Suurballe - {filename}")
     plt.axis('off')
     output_filename = f"output/{filename}.png" # Usa filename base
     try:
