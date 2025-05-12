@@ -149,7 +149,7 @@ def find_best_paths(G, origem, destino, algoritmo):
     return path1, cost1, path2, cost2
 # ------------------------------------------------------
 
-def suurballe(G, origem_orig, destino_orig, algoritmo):
+def suurballe(G, origem_orig, destino_orig, algoritmo, option):
     """!
     @brief Implementa o algoritmo de Suurballe para encontrar dois caminhos disjuntos em um grafo.
 
@@ -165,7 +165,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     """
 
     # --- PASSO 0: Encontrar P1 no grafo original ---
-    if algoritmo == 2: 
+    if algoritmo == 2 and not option: 
         print("\n--- Step 0: Encontrar 1º caminho no grafo original ---")
     
     try:
@@ -175,7 +175,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
         print("Não há caminho inicial.")
         return None, None
     
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         draw_suurballe(G, origem_orig, destino_orig, P1_original, None, "Step 0 - Primeiro Caminho no Grafo Original")
         # --- Node Splitting ---
         print("\n--- Step 0.5: Node Splitting ---")
@@ -183,7 +183,8 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     # H é o Grafo com node splitting
     # s é o nó de origem (com sufixo _out) e t é o nó de destino (com sufixo _in)
     H, s, t = split_nodes(G, origem_orig, destino_orig, path=P1_original)
-    if algoritmo == 2:
+    
+    if algoritmo == 2 and not option:
         draw_suurballe(H, s, t, None, None, "Step 0.5 - Grafo após Node Splitting")
         # --- Step 1: Encontrar P1 no grafo transformado ---
         print("\n--- Step 1: Encontrar 1º caminho no grafo transformado ---")
@@ -202,12 +203,12 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     # até o nó de destino
     P1_split = path[t]
 
-    if algoritmo == 2: 
+    if algoritmo == 2 and not option: 
         print(f"1.º Caminho, P1, (split nodes): {P1_split}")
         draw_suurballe(H, s, t, P1_split, None, "Step 1 - 1º Caminho com Node Splitting")
     
     # --- Step 2: Transformar a rede ---
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         print("\n--- Step 2: Transformar a Rede ---")
     
     # alterações no grafo residual
@@ -215,7 +216,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     distance = nx.shortest_path_length(H, source=s, weight='cost')
     
     # 2.1: Custos reduzidos
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         print("Step 2.1: Custos Reduzidos")
     
     # Calcular os custos reduzidos para cada aresta
@@ -230,11 +231,12 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
                 H_residual[u][v]['cost'] = c_ij + t_s_i - t_s_j
             else:
                 H_residual[u][v]['cost'] = float('inf')
-    if algoritmo == 2:
+
+    if algoritmo == 2 and not option:
         draw_suurballe(H_residual, s, t, None, None, "Step 2.1 - Custos Reduzidos")
     
     # 2.2: Inverter arcos de P1
-    if algoritmo == 2: 
+    if algoritmo == 2 and not option: 
         print("\nStep 2.2: Remover arcos de P1 direcionados para a origem")
     
     # Remover arcos direcionados para a origem
@@ -253,7 +255,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
         if H_residual.has_edge(reverse_u, reverse_v):
             H_residual.remove_edge(reverse_u, reverse_v)
     
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         draw_suurballe(H_residual, s, t, None, None, "Step 2.2 - Arcos Removidos")
 
     # Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0
@@ -269,18 +271,18 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
             H_residual.remove_edge(u, v)
             H_residual.add_edge(v, u, cost=0)
 
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         print("\nStep 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
         draw_suurballe(H_residual, s, t, None, None, "Step 2.3 - Arcos Invertidos")
     
     # --- Step 3: Encontrar P2 no grafo residual ---
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         print("\n--- Step 3: Encontrar 2º Caminho no Grafo Residual ---")
     
     try:
         P2_split = nx.shortest_path(H_residual, source=s, target=t, weight='cost')
         
-        if algoritmo == 2: 
+        if algoritmo == 2 and not option: 
             print(f"2.º Caminho, P2, (split nodes): {P2_split}")
             draw_suurballe(H_residual, s, t, None, P2_split, "Step 3 - 2º Caminho no Grafo Residual")
 
@@ -294,7 +296,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
         return merge_split_path(P1_original), None
     
     # --- Step 4: Remover arcos opostos ---
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         print("\n--- Step 4: Remover arcos em comum ---")
     
     # P1_edges e P2_edges são as arestas do primeiro e segundo caminho
@@ -311,10 +313,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     
     ### AGORAAAAAAAAAAAAAAA
 
-    # corrigir para PT
     # ver se conseguimos para 2 caminhos seguidos
-    # melhorar gráfico final
-    # opção para passar tudo à frente
 
     # Criar um grafo com todas as arestas de ambos os caminhos
     deinterlace_graph = nx.DiGraph()
@@ -341,7 +340,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
         P1_final = P1_split
         P2_final = P2_split
     
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         draw_suurballe(H_residual, s, t, P1_final, P2_final, "Step 4 - Caminhos Desentrelaçados")
     
         # --- Unsplitting nodes final ---
@@ -352,7 +351,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     P1 = merge_split_path(P1_final)
     P2 = merge_split_path(P2_final)
         
-    if algoritmo == 2:
+    if algoritmo == 2 and not option:
         print(f"Caminho 1 Final: {P1}")
         print(f"Caminho 2 Final: {P2}")
     
@@ -364,17 +363,6 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     if P1 == P2:
         print("Os caminhos são iguais.")
         return P1, None
-    
-    common_nodes = set(P1[1:-1]) & set(P2[1:-1])
-    if common_nodes:
-        print("MÉTODO SUURBALLE: ")
-        print("\tAviso: Caminhos compartilham nós internos.")
-        print("\tNão é possível garantir disjunção total, logo não existe um segundo caminho.")
-        return P1, None
-    else:
-        if algoritmo == 3:
-            print("MÉTODO SUURBALLE: ")
-            print(f"\tCaminho: {P2}")
     
     return P1, P2
 

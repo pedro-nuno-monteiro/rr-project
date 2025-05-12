@@ -107,14 +107,16 @@ while True:
                 @param destino Nó de destino.
                 @param caminho1 Caminho mais curto.
                 @param caminho2 Caminho Two Step Approach.
-                @param caminho3 Caminho Suurbale.
+                @param caminho3 Caminho Suurballe.
                 """
                 # desenhar o grafo
                 draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None, algoritmo=algoritmo)
 
             if algoritmo == 2:
 
-                caminho1, caminho2 = suurballe(G, origem, destino, algoritmo=algoritmo)
+                option = ask_skip_forward()
+
+                caminho1, caminho2 = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
                 draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None, algoritmo=algoritmo)
             
             if algoritmo == 3:

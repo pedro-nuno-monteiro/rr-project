@@ -43,22 +43,22 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
     plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     # Desenha todas as arestas com opacidade
-    nx.draw_networkx_edges(G, pos, edge_color='gray', alpha=0.2, width=1)
+    nx.draw_networkx_edges(G, pos, edge_color='black', alpha=0.8, width=1.2)
 
     # Primeiro caminho (mais curto) - verde
     if caminho1:
         path_edges1 = list(zip(caminho1, caminho1[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3)
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3, arrows=True, arrowsize=20)
 
     # Segundo caminho (Two-Step) - azul
     if caminho2:
         path_edges2 = list(zip(caminho2, caminho2[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3)
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges2, edge_color='blue', width=3, arrows=True, arrowsize=20)
 
     # Terceiro caminho (Suurballe) - roxo
     if caminho3:
         path_edges3 = list(zip(caminho3, caminho3[1:]))
-        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, edge_color='purple', width=3)
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges3, edge_color='purple', width=3, arrows=True, arrowsize=20)
 
     # Rótulos dos custos das arestas
     edge_labels = {}

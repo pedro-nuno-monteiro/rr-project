@@ -96,7 +96,7 @@ def ask_which_algorithm():
     
     print("\n-------------- Escolha do nó algoritmo a utilizar ---------------\n")
     print(" 1. Two Step Approach")
-    print(" 2. Suurbale")
+    print(" 2. Suurballe")
     print(" 3. Usar ambos os métodos")
 
     while True:
@@ -111,3 +111,35 @@ def ask_which_algorithm():
             print("\nNúmero inválido. Por favor, escolha um número da lista.")  
 
     return option
+
+# ------------------------------------------------------
+def ask_skip_forward():
+    """!
+    @brief Pergunta ao usuário se deseja passar todos os passos à frente.
+
+    Esta função exibe uma mensagem a perguntar se o user deseja passar à frente todos os passos.
+
+    @return True se o usuário escolher 's', False se o usuário escolher 'n'.
+    """
+
+    clear_screen()
+
+    print("\n-------------- Escolha de visualização ---------------\n")
+    print(" O programa irá apresentar todos os passos do algoritmo")
+    print(" mostrando, para cada, o grafo correspondente.")
+    print(" Escolha se deseja passar todos os passos à frente (1) ou não (0)")
+
+    while True:
+        option = int(input("\nDigite a opção pretendida: "))
+        
+        if option == 1:
+            clear_screen()
+            print("\n-------------- Visualização final ---------------\n")
+            print(" É apresentado o grafo final")
+            print(" e guardado no ficheiro 'output/Rede Final.png'")
+            return True
+        elif option == 0:
+            clear_screen()
+            return False
+        else:
+            print("Opção inválida. Por favor, digite 1 ou 0.")
