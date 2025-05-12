@@ -158,6 +158,7 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     print(f"\nA desenhar: {filename}")
     # Cria uma nova figura para cada passo para evitar sobreposição
     plt.figure(f"{filename}", figsize=(12, 8)) # Nome único para a figura
+    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
 
     # Obtém posições diretamente do grafo G (devem ter sido adicionadas antes)
     pos = nx.get_node_attributes(G, 'pos')

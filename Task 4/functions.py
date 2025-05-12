@@ -235,37 +235,42 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     
     # 2.2: Inverter arcos de P1
     if algoritmo == 2: 
-        print("Step 2.2: Remover arcos de P1 direcionados para a origem")
-        print("Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
+        print("\nStep 2.2: Remover arcos de P1 direcionados para a origem")
     
-    P1_edges = list(zip(P1_split[:-1], P1_split[1:]))
-    print(f"Arcos de P1: {P1_edges}")
-        
-    # Step 2.2: Remove arcs that point towards source
-    # We process edges in reverse order (from destination to source)
-    node_pairs = list(zip(P1_split[:-1], P1_split[1:]))  # Get original edges
+    # Remover arcos direcionados para a origem
+    node_pairs = list(zip(P1_split[:-1], P1_split[1:]))
     for u, v in node_pairs:
-        base_u = u.rsplit('_', 1)[0]  # Get base node name without _in/_out
+
+        # fica só os nomes sem _in/_out
+        base_u = u.rsplit('_', 1)[0]
         base_v = v.rsplit('_', 1)[0]
-        # Remove edge from v to u (the reverse direction)
+
+        # criar os nomes dos arcos inversos para facilitar
         reverse_u = f"{base_v}_out"
         reverse_v = f"{base_u}_in"
+
+        # remove o arco de v para u
         if H_residual.has_edge(reverse_u, reverse_v):
             H_residual.remove_edge(reverse_u, reverse_v)
     
     if algoritmo == 2:
-        draw_suurballe(H_residual, s, t, None, None, "Step 2.2 - Arcos Removidos ")
+        draw_suurballe(H_residual, s, t, None, None, "Step 2.2 - Arcos Removidos")
 
-    # Step 2.3: Reverse remaining arcs (those pointing towards destination)
+    # Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0
     for i in range(len(P1_split)-1):
-        u, v = P1_split[i], P1_split[i+1]  # Edge pointing towards destination
+
+        # u, v são os nós de origem e destino
+        # do arco que queremos inverter
+        u, v = P1_split[i], P1_split[i+1]
+
+        # se o arco existe, inverter a direção
+        # e definir o custo como 0
         if H_residual.has_edge(u, v):
-            # Remove original edge and add reversed edge with cost 0
             H_residual.remove_edge(u, v)
             H_residual.add_edge(v, u, cost=0)
 
     if algoritmo == 2:
-        print("Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
+        print("\nStep 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
         draw_suurballe(H_residual, s, t, None, None, "Step 2.3 - Arcos Invertidos")
     
     # --- Step 3: Encontrar P2 no grafo residual ---
@@ -292,86 +297,86 @@ def suurballe(G, origem_orig, destino_orig, algoritmo):
     if algoritmo == 2:
         print("\n--- Step 4: Remover arcos em comum ---")
     
-    P1_edges = set(zip(P1_split[:-1], P1_split[1:]))
-    P2_edges = set(zip(P2_split[:-1], P2_split[1:]))
+    # P1_edges e P2_edges são as arestas do primeiro e segundo caminho
+    P1_edges = list(zip(P1_split[:-1], P1_split[1:]))
+    P2_edges = list(zip(P2_split[:-1], P2_split[1:]))
     
-    # Encontrar arcos em comum (opostos) entre P1 e P2
-    # Se (u, v) está em P1 e (v, u) está em P2, então são opostos
-    opposite_edges = set()
-    for (u, v) in P1_edges:
-        if (v, u) in P2_edges:
-            opposite_edges.add((u, v))
-            opposite_edges.add((v, u))
+    # Encontrar arcos em comum
+    arcos_em_comum = set()
+    for i, (u1, v1) in enumerate(P1_edges):
+        for j, (u2, v2) in enumerate(P2_edges):
+            if u1 == v2 and v1 == u2:
+                arcos_em_comum.add(u1)
+                arcos_em_comum.add(v1)
     
-    print(f"Arcos em comum: {opposite_edges}")
-    input("enter")
+    ### AGORAAAAAAAAAAAAAAA
 
+    # corrigir para PT
+    # ver se conseguimos para 2 caminhos seguidos
+    # melhorar gráfico final
+    # opção para passar tudo à frente
+
+    # Criar um grafo com todas as arestas de ambos os caminhos
+    deinterlace_graph = nx.DiGraph()
+    for u, v in P1_edges:
+        deinterlace_graph.add_edge(u, v)
+    for u, v in P2_edges:
+        deinterlace_graph.add_edge(u, v)
+
+    # Encontrar o caminho mais curto entre os nós de origem e destino
+    try:
+        P1_final = nx.shortest_path(deinterlace_graph, P1_split[0], P1_split[-1])
+        
+        # Remover arestas do primeiro caminho
+        # no grafo temporário
+        temp_graph = deinterlace_graph.copy()
+        for u, v in zip(P1_final[:-1], P1_final[1:]):
+            temp_graph.remove_edge(u, v)
+
+        # segundo caminho final
+        P2_final = nx.shortest_path(temp_graph, P2_split[0], P2_split[-1])
+
+    except nx.NetworkXNoPath:
+        print("Não foi possível encontrar o segundo caminho disjunto.")
+        P1_final = P1_split
+        P2_final = P2_split
+    
     if algoritmo == 2:
-        if opposite_edges:
-            print(f"Arcos em comum: {opposite_edges}")
-        else:
-            print("Não há arcos em comum entre P1 e P2.")
-
-    # Reconstruir caminhos
-    # path1_final começa com o nó de origem
-    path1_final = [s]
-
-    # se arco (u, v) não está em opposite_edges, adiciona u e v ao caminho
-    # se u não é o último nó do caminho, adiciona-o
-    for u, v in zip(P1_split[:-1], P1_split[1:]):
-        if (u, v) not in opposite_edges:
-            if path1_final[-1] != u:
-                path1_final.append(u)
-            path1_final.append(v)
-    
-    # path2_final começa com o nó de origem
-    path2_final = [s]
-
-    # se arco (u, v) não está em opposite_edges, adiciona u e v ao caminho
-    # se u não é o último nó do caminho, adiciona-o
-    for u, v in zip(P2_split[:-1], P2_split[1:]):
-        if (u, v) not in opposite_edges:
-            if path2_final[-1] != u:
-                path2_final.append(u)
-            path2_final.append(v)
-    
-    if algoritmo == 2:
-        print(f"P1 após remoção: {path1_final}")
-        print(f"P2 após remoção: {path2_final}")
-    
-        draw_suurballe(H_residual, s, t, path1_final, path2_final, "Step 4 - Caminhos Finais no Grafo Residual")
+        draw_suurballe(H_residual, s, t, P1_final, P2_final, "Step 4 - Caminhos Desentrelaçados")
     
         # --- Unsplitting nodes final ---
         print("\n--- Merge final para nós originais ---")
     
-    final_P1 = merge_split_path(path1_final)
-    final_P2 = merge_split_path(path2_final)
+    # Merge final para nós originais
+    # P1_final e P2_final são os caminhos finais
+    P1 = merge_split_path(P1_final)
+    P2 = merge_split_path(P2_final)
         
     if algoritmo == 2:
-        print(f"Caminho 1 Final: {final_P1}")
-        print(f"Caminho 2 Final: {final_P2}")
+        print(f"Caminho 1 Final: {P1}")
+        print(f"Caminho 2 Final: {P2}")
     
     # Verificação final de disjunção
-    if not final_P1 or not final_P2:
+    if not P1 or not P2:
         print("Não existe segundo caminho disjunto.")
-        return final_P1, None
+        return P1, None
     
-    if final_P1 == final_P2:
+    if P1 == P2:
         print("Os caminhos são iguais.")
-        return final_P1, None
+        return P1, None
     
-    common_nodes = set(final_P1[1:-1]) & set(final_P2[1:-1])
+    common_nodes = set(P1[1:-1]) & set(P2[1:-1])
     if common_nodes:
         print("MÉTODO SUURBALLE: ")
         print("\tAviso: Caminhos compartilham nós internos.")
         print("\tNão é possível garantir disjunção total, logo não existe um segundo caminho.")
-        return final_P1, None
+        return P1, None
     else:
         if algoritmo == 3:
             print("MÉTODO SUURBALLE: ")
-            print(f"\tCaminho: {final_P2}")
+            print(f"\tCaminho: {P2}")
     
-    return final_P1, final_P2
+    return P1, P2
 
 # ------------------------------------------------------
 def split_nodes(G, source_orig, target_orig, path=None):
