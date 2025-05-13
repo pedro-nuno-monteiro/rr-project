@@ -81,13 +81,13 @@ while True:
         if algoritmo == 2:
 
             option = ask_skip_forward()
-            caminho_sur, _, caminho3, _ = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
+            caminho_sur, _, caminho3, _ = suurballe(G, origem, destino, algoritmo=algoritmo, option=option, calculo=False)
             draw_network(G, node_mapping, origem, destino, None, None, caminho_sur, caminho3, algoritmo=algoritmo)            
         if algoritmo == 3:
 
             option = 0
             caminho_tsa, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
-            caminho_sur, _, caminho3, _ = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
+            caminho_sur, _, caminho3, _ = suurballe(G, origem, destino, algoritmo=algoritmo, option=option, calculo=False)
             draw_network(G, node_mapping, origem, destino, caminho_tsa, caminho2, caminho_sur, caminho3, algoritmo=algoritmo)
 
     

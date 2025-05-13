@@ -151,7 +151,7 @@ def find_best_paths(G, origem, destino, algoritmo):
     return path1, cost1, path2, cost2
 # ------------------------------------------------------
 
-def suurballe(G, origem_orig, destino_orig, algoritmo, option):
+def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
     """!
     @brief Implementa o algoritmo de Suurballe para encontrar dois caminhos disjuntos em um grafo.
 
@@ -175,7 +175,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
         P1_original = nx.shortest_path(G, source=origem_orig, target=destino_orig, weight='cost')
     except nx.NetworkXNoPath:
         print("Não há caminho inicial.")
-        return None, None
+        return None, None, None, None
     
     if algoritmo == 2 and not option:
         draw_suurballe(G, origem_orig, destino_orig, P1_original, None, "Step 0 - Primeiro Caminho no Grafo Original")
@@ -195,11 +195,11 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
         path = nx.shortest_path(H, source=s, weight='cost')
     except nx.NetworkXNoPath:
         print(f"Destino {t} não alcançável.")
-        return merge_split_path(P1_original), None
+        return merge_split_path(P1_original), None, None, None
 
     if t not in path:
         print(f"Destino {t} não alcançável a partir de {s}.")
-        return merge_split_path(P1_original), None
+        return merge_split_path(P1_original), None, None, None
 
     # P1_split é o caminho encontrado no grafo transformado
     # até o nó de destino
@@ -289,13 +289,15 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
             draw_suurballe(H_residual, s, t, None, P2_split, "Step 3 - 2º Caminho no Grafo Residual")
 
     except nx.NetworkXNoPath:
-        print("Não existe segundo caminho disjunto.")
-        return merge_split_path(P1_original), None
+        if not calculo:
+            print("Não existe segundo caminho disjunto.")
+        return merge_split_path(P1_original), None, None, None
     
     # Validação do P2
     if not is_valid_path(P2_split, G):
-        print("P2 não corresponde a um caminho válido no grafo original.")
-        return merge_split_path(P1_original), None
+        if not calculo:
+            print("P2 não corresponde a um caminho válido no grafo original.")
+        return merge_split_path(P1_original), None, None, None
     
     # --- Step 4: Remover arcos opostos ---
     if algoritmo == 2 and not option:
@@ -338,8 +340,9 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
         P2_final = nx.shortest_path(temp_graph, P2_split[0], P2_split[-1])
 
     except nx.NetworkXNoPath:
-        print("SURBALLE:")
-        print("\tNão foi possível encontrar o segundo caminho disjunto.")
+        if not calculo:
+            print("SURBALLE:")
+            print("\tNão foi possível encontrar o segundo caminho disjunto.")
         P1_final = P1_split
         P2_final = P2_split
     
@@ -375,11 +378,13 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
 
     # Verificação final de disjunção
     if not P1 or not P2:
-        print("Não existe segundo caminho disjunto.")
+        if not calculo:
+            print("Não existe segundo caminho disjunto.")
         return P1, cost1, None, None
 
     if P1 == P2:
-        print("Os caminhos são iguais.")
+        if not calculo:
+            print("Os caminhos são iguais.")
         return P1, cost1, None, None
 
     return P1, cost1, P2, cost2

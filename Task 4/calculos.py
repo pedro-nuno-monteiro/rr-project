@@ -15,7 +15,7 @@ def calculos_auxiliares(G, otimo, calcular_erro_medio):
         # Executa TSA
         _, cost_1_tsa, path2, cost_2_tsa = find_best_paths(G, origem, destino, algoritmo=None)
         # Executa Suurballe
-        _, cost_1_sur, P2, cost_2_sur = suurballe(G, origem, destino, algoritmo=None, option=0)
+        _, cost_1_sur, P2, cost_2_sur = suurballe(G, origem, destino, algoritmo=None, option=0, calculo=True)
         
         # Verifica se ambos encontraram soluções
         tsa_valido = (path2 is not None) and (cost_2_tsa is not None)
