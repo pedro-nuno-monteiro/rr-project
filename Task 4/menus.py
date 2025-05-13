@@ -6,7 +6,7 @@ networks = ["networks/abilene.txt", "networks/atlanta.txt", "networks/nobel-eu.t
 
 def show_ask_network():
     clear_screen()
-    print(" ----------- Redes disponíveis ------------------\n")
+    print(" ----------- Redes disponíveis ---------------\n")
     
     for i, ficheiro in enumerate(networks, 1):
         display_name = ficheiro.replace('networks/', '')
@@ -137,8 +137,7 @@ def ask_which_algorithm():
     print(" 1. Two Step Approach")
     print(" 2. Suurballe")
     print(" 3. Usar ambos os métodos")
-    
-    print(" ---------------------------------------------------------------\n")
+    print(" ---------------------------------------------------------------")
 
     while True:
         try:
@@ -167,10 +166,9 @@ def ask_skip_forward():
 
     print("\n-------------- Escolha de visualização ---------------\n")
     print(" O programa irá apresentar todos os passos do algoritmo")
-    print(" mostrando, para cada, o grafo correspondente.")
-    print(" Escolha se deseja passar todos os passos à frente (1) ou não (0)")
-    
-    print(" -------------------------------------------------------\n")
+    print(" mostrando, para cada, o grafo correspondente.\n")
+    print(" Escolha se deseja\n  - passar todos os passos à frente (1)\n  - ver grafos passo a passo (0)")
+    print(" -------------------------------------------------------")
 
     while True:
         option = int(input("\nDigite a opção pretendida: "))

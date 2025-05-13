@@ -25,8 +25,8 @@ while True:
     """
 
     clear_screen()  
-    print(" \n-------------- Opções disponíveis: ---------------\n")
-    print(" 1. Cálculo de caminhos")
+    print(" \n-------------- Opções disponíveis ----------------\n")
+    print(" 1. Determinar Caminhos")
     print(" 2. Cálculos Estatísticos")
     print(" 3. Sair")
     print("--------------------------------------------------")

@@ -204,10 +204,10 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     @note A função cria uma visualização do grafo, destacando os caminhos e as arestas em diferentes cores para facilitar a compreensão do algoritmo.
     @note As arestas internas (de um nó dividido) são desenhadas com uma linha tracejada e de cor prata.
     """
-    print(f"\nA desenhar: {filename}")
+    print(f"\n * A desenhar: {filename}")
     # Cria uma nova figura para cada passo para evitar sobreposição
     plt.figure(f"{filename}", figsize=(12, 8)) # Nome único para a figura
-    plt.subplots_adjust(left=0, right=1, top=1, bottom=0)
+    plt.subplots_adjust(left=0.05, right=0.95, top=0.92, bottom=0.08)
 
     # Obtém posições diretamente do grafo G (devem ter sido adicionadas antes)
     pos = nx.get_node_attributes(G, 'pos')
@@ -282,7 +282,7 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     output_filename = f"output/{filename}.png" # Usa filename base
     try:
         plt.savefig(output_filename, dpi=300, bbox_inches='tight')
-        print(f"Gráfico guardado na localização: {output_filename}")
+        print(f" * Gráfico guardado na localização: {output_filename}")
     except Exception as e:
         print(f"Erro ao guardar {output_filename}: {e}")
     plt.show()
