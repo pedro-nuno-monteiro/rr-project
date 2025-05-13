@@ -219,7 +219,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
     
     # 2.1: Custos reduzidos
     if algoritmo == 2 and not option:
-        print("Step 2.1: Custos Reduzidos")
+        print("\n * Step 2.1: Custos Reduzidos")
     
     # Calcular os custos reduzidos para cada aresta
     # c_ij' = c_ij + t_s_i - t_s_j
@@ -239,7 +239,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
     
     # 2.2: Inverter arcos de P1
     if algoritmo == 2 and not option: 
-        print("\nStep 2.2: Remover arcos de P1 direcionados para a origem")
+        print("\n * Step 2.2: Remover arcos de P1 direcionados para a origem")
     
     # Remover arcos direcionados para a origem
     node_pairs = list(zip(P1_split[:-1], P1_split[1:]))
@@ -274,7 +274,7 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
             H_residual.add_edge(v, u, cost=0)
 
     if algoritmo == 2 and not option:
-        print("\nStep 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
+        print("\n * Step 2.3: Inverter direção dos arcos de P1 e definir custo como 0")
         draw_suurballe(H_residual, s, t, None, None, "Step 2.3 - Arcos Invertidos")
     
     # --- Step 3: Encontrar P2 no grafo residual ---
@@ -315,16 +315,15 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
                 arcos_em_comum.add(u1)
                 arcos_em_comum.add(v1)
     
-    ### AGORAAAAAAAAAAAAAAA
-
-    # ver se conseguimos para 2 caminhos seguidos
-
     # Criar um grafo com todas as arestas de ambos os caminhos
     deinterlace_graph = nx.DiGraph()
     for u, v in P1_edges:
         deinterlace_graph.add_edge(u, v)
     for u, v in P2_edges:
         deinterlace_graph.add_edge(u, v)
+
+    if algoritmo == 2 and not option and arcos_em_comum:
+        draw_suurballe(H_residual, s, t, P1_split, P2_split, "Step 4 - Grafo com Arcos em Comum")
 
     # Encontrar o caminho mais curto entre os nós de origem e destino
     try:
@@ -347,10 +346,10 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
         P2_final = P2_split
     
     if algoritmo == 2 and not option:
-        draw_suurballe(H_residual, s, t, P1_final, P2_final, "Step 4 - Caminhos Desentrelaçados")
-    
-        # --- Unsplitting nodes final ---
+        
+        draw_suurballe(H_residual, s, t, P2_final, P1_final, "Step 4 - Caminhos Desentrelaçados")
         print("\n--- Merge final para nós originais ---")
+
     # Merge final para nós originais
     # P1_final e P2_final são os caminhos finais
     P1 = merge_split_path(P1_final)
