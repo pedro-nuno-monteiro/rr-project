@@ -107,7 +107,7 @@ def find_best_paths(G, origem, destino, algoritmo):
     cost1 = nx.shortest_path_length(G, source=origem, target=destino, weight='cost')
     if algoritmo == 1:
         print(f"Primeiro caminho: {path1} (Custo: {cost1})")
-    else: 
+    elif algoritmo == 3: 
         print("CAMINHO MAIS CURTO: ")
         print(f"\tCaminho: {path1}")
     
@@ -136,14 +136,16 @@ def find_best_paths(G, origem, destino, algoritmo):
         if algoritmo == 3:
             print("Método TSA: ")
             print(f"\tCaminho: {path2}")
-        else:          
+        if algoritmo == 1:          
             print(f"Segundo caminho: {path2} (Custo: {cost2})")
         
     except nx.NetworkXNoPath:
         if algoritmo == 3:
             print("Método TSA: ")
-        
-        print("\tAviso: Não há um segundo caminho possível.")
+        if algoritmo == 1 or algoritmo == 3:
+            
+            print("\tAviso: Não há um segundo caminho possível.")
+            
         path2, cost2 = None, None
 
     return path1, cost1, path2, cost2
@@ -336,7 +338,8 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
         P2_final = nx.shortest_path(temp_graph, P2_split[0], P2_split[-1])
 
     except nx.NetworkXNoPath:
-        print("Não foi possível encontrar o segundo caminho disjunto.")
+        print("SURBALLE:")
+        print("\tNão foi possível encontrar o segundo caminho disjunto.")
         P1_final = P1_split
         P2_final = P2_split
     
@@ -345,26 +348,41 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option):
     
         # --- Unsplitting nodes final ---
         print("\n--- Merge final para nós originais ---")
-    
     # Merge final para nós originais
     # P1_final e P2_final são os caminhos finais
     P1 = merge_split_path(P1_final)
     P2 = merge_split_path(P2_final)
-        
-    if algoritmo == 2 and not option:
-        print(f"Caminho 1 Final: {P1}")
-        print(f"Caminho 2 Final: {P2}")
-    
+
+    # Calcular custos dos caminhos
+    def path_cost(path, G):
+        if not path or len(path) < 2:
+            return None
+        cost = 0
+        for u, v in zip(path[:-1], path[1:]):
+            if G.has_edge(u, v):
+                cost += G[u][v].get('cost', 1)
+            else:
+                return None
+        return cost
+
+    cost1 = path_cost(P1, G)
+    cost2 = path_cost(P2, G)
+
+    if algoritmo == 2 or algoritmo == 3:
+        print("\nMétodo Suurballe:")
+        print(f"\n\tCaminho 1: {P1} (Custo: {cost1})")
+        print(f"\n\tCaminho 2: {P2} (Custo: {cost2})")
+
     # Verificação final de disjunção
     if not P1 or not P2:
         print("Não existe segundo caminho disjunto.")
-        return P1, None
-    
+        return P1, cost1, None, None
+
     if P1 == P2:
         print("Os caminhos são iguais.")
-        return P1, None
-    
-    return P1, P2
+        return P1, cost1, None, None
+
+    return P1, cost1, P2, cost2
 
 # ------------------------------------------------------
 def split_nodes(G, source_orig, target_orig, path=None):

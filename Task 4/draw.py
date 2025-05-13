@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import math
 import matplotlib.lines as mlines
 
-def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3, algoritmo):
+def draw_network(G, node_mapping, origem, destino, caminho_tsa, caminho2, caminho_sur, caminho3, algoritmo):
     """
     Desenha o grafo destacando até três caminhos e os nós de origem e destino.
 
@@ -46,10 +46,13 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
     nx.draw_networkx_edges(G, pos, edge_color='black', alpha=0.8, width=1.2)
 
     # Primeiro caminho (mais curto) - verde
-    if caminho1:
-        path_edges1 = list(zip(caminho1, caminho1[1:]))
+    if caminho_tsa:
+        path_edges1 = list(zip(caminho_tsa, caminho_tsa[1:]))
         nx.draw_networkx_edges(G, pos, edgelist=path_edges1, edge_color='green', width=3, arrows=True, arrowsize=20)
 
+    if caminho_sur:
+        path_edges4 = list(zip(caminho_sur, caminho_sur[1:]))
+        nx.draw_networkx_edges(G, pos, edgelist=path_edges4, edge_color='orange', width=3, arrows=True, arrowsize=20)
     # Segundo caminho (Two-Step) - azul
     if caminho2:
         path_edges2 = list(zip(caminho2, caminho2[1:]))
@@ -77,26 +80,72 @@ def draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3,
 
     # Legenda
     legenda = [
-        mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto"),
         mlines.Line2D([], [], color='green', marker='s', markersize=8, linestyle='None', label="Nó Origem"),
         mlines.Line2D([], [], color='red', marker='s', markersize=8, linestyle='None', label="Nó Destino")
     ]
 
     if algoritmo == 1:
+        legenda.append(mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto"))
         legenda.append(mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach"))
     elif algoritmo == 2:
+        legenda.append(mlines.Line2D([], [], color='orange', linewidth=3, label="Caminho Inicial Surballe"))
         legenda.append(mlines.Line2D([], [], color='blue', linewidth=3, label="Suurballe"))
     elif algoritmo == 3:
-        legenda.extend([
-            mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach"),
-            mlines.Line2D([], [], color='purple', linewidth=3, label="Suurballe")
-        ])
+            # Subplots: um para TSA, outro para Suurballe
+            fig, axs = plt.subplots(1, 2, figsize=(18, 7))
+            plt.subplots_adjust(left=0.05, right=0.95, top=0.92, bottom=0.08, wspace=0.25)
 
+            # --- Subplot 1: TSA ---
+            axs[0].set_title("Two-Step Approach")
+            nx.draw_networkx_edges(G, pos, ax=axs[0], edge_color='black', alpha=0.8, width=1.2)
+            if caminho_tsa:
+                path_edges1 = list(zip(caminho_tsa, caminho_tsa[1:]))
+                nx.draw_networkx_edges(G, pos, ax=axs[0], edgelist=path_edges1, edge_color='green', width=3, arrows=True, arrowsize=20)
+            if caminho2:
+                path_edges2 = list(zip(caminho2, caminho2[1:]))
+                nx.draw_networkx_edges(G, pos, ax=axs[0], edgelist=path_edges2, edge_color='blue', width=3, arrows=True, arrowsize=20)
+            for nome, (x, y) in pos.items():
+                label_text = labels.get(nome, nome)
+                axs[0].text(x, y, label_text, fontsize=8, fontweight='bold',
+                    bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
+                    horizontalalignment='center', verticalalignment='center')
+            axs[0].axis('off')
+
+            # --- Subplot 2: Suurballe ---
+            axs[1].set_title("Suurballe")
+            nx.draw_networkx_edges(G, pos, ax=axs[1], edge_color='black', alpha=0.8, width=1.2)
+            if caminho_sur:
+                path_edges4 = list(zip(caminho_sur, caminho_sur[1:]))
+                nx.draw_networkx_edges(G, pos, ax=axs[1], edgelist=path_edges4, edge_color='orange', width=3, arrows=True, arrowsize=20)
+            if caminho3:
+                path_edges3 = list(zip(caminho3, caminho3[1:]))
+                nx.draw_networkx_edges(G, pos, ax=axs[1], edgelist=path_edges3, edge_color='purple', width=3, arrows=True, arrowsize=20)
+            for nome, (x, y) in pos.items():
+                label_text = labels.get(nome, nome)
+                axs[1].text(x, y, label_text, fontsize=8, fontweight='bold',
+                    bbox=dict(facecolor=node_colors.get(nome, 'lightblue'), edgecolor='black', boxstyle='round,pad=0.3'),
+                    horizontalalignment='center', verticalalignment='center')
+            axs[1].axis('off')
+
+            # Legenda única para ambos
+            legenda.append(mlines.Line2D([], [], color='green', linewidth=3, label="Caminho Mais Curto"))
+            legenda.append(mlines.Line2D([], [], color='orange', linewidth=3, label="Caminho Inicial Surballe"))
+            legenda.extend([
+                mlines.Line2D([], [], color='blue', linewidth=3, label="Two-Step Approach"),
+                mlines.Line2D([], [], color='purple', linewidth=3, label="Suurballe")
+            ])
+            fig.legend(handles=legenda, loc='upper center', ncol=5)
+            plt.savefig("output/Rede Final.png", dpi=300)
+            plt.show()
+            return
+
+    
     plt.legend(handles=legenda, loc='upper right')
     plt.box(False)
     plt.title(f"Rede Final")
     plt.savefig("output/Rede Final.png", dpi=300)
     plt.show()
+    
 
 # ------------------------------------------------------
 def draw_empty_network(G, node_mapping):

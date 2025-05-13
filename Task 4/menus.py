@@ -1,6 +1,45 @@
 import os
 import matplotlib.pyplot as plt
+from functions import *
 
+networks = ["networks/abilene.txt", "networks/atlanta.txt", "networks/nobel-eu.txt", "networks/nobel-germany.txt"]
+
+def show_ask_network():
+    clear_screen()
+    print(" ----------- Redes disponíveis ------------------\n")
+    
+    for i, ficheiro in enumerate(networks, 1):
+        display_name = ficheiro.replace('networks/', '')
+        print(f"  {i}. {display_name}")
+        
+    print("\n  5. Inserir outra rede")
+    print(" ---------------------------------------------\n")
+    escolha = int(input("Selecione a rede pretendida: ")) - 1
+    
+    if escolha == 4:
+            novo_ficheiro = ask_network()
+            if novo_ficheiro != "":
+                networks.append(novo_ficheiro)
+                escolha = len(networks) - 1
+                
+    with open(networks[escolha], 'r') as file:
+        """!
+        @brief Leitura dos dados do ficheiro escolhido.
+        """
+        # leitura da info do ficheiro escolhido
+        network_data = file.read()
+
+        """!
+        @brief Criação do grafo e mapeamento dos nós.
+        @param network_data Dados da rede do ficheiro.
+        @return G Grafo criado.
+        @return node_mapping Mapa dos nós.
+        """
+        # criação do grafo e mapeamento dos nós
+        G, node_mapping = retrieve_data(network_data)
+        
+        return G, node_mapping
+    
 # ------------------------------------------------------
 def ask_network():
     """!
@@ -98,6 +137,8 @@ def ask_which_algorithm():
     print(" 1. Two Step Approach")
     print(" 2. Suurballe")
     print(" 3. Usar ambos os métodos")
+    
+    print(" ---------------------------------------------------------------\n")
 
     while True:
         try:
@@ -128,6 +169,8 @@ def ask_skip_forward():
     print(" O programa irá apresentar todos os passos do algoritmo")
     print(" mostrando, para cada, o grafo correspondente.")
     print(" Escolha se deseja passar todos os passos à frente (1) ou não (0)")
+    
+    print(" -------------------------------------------------------\n")
 
     while True:
         option = int(input("\nDigite a opção pretendida: "))
@@ -143,3 +186,27 @@ def ask_skip_forward():
             return False
         else:
             print("Opção inválida. Por favor, digite 1 ou 0.")
+            
+# ------------------------------------------------------
+def ask_which_calculus():
+    clear_screen()
+    print("\n-------------- Escolha do cálculo a realizar ---------------\n")
+    print(" 1. Calcular taxa de resolução")
+    print(" 2. Calcular taxa de resolução ótima")
+    print(" 3. Calcular erro médio do custo")
+    
+    print(" -------------------------------------------------------------")
+    
+    while True:
+        try:
+            escolha = int(input("\nDigite a opção pretendida: "))
+            if escolha in [1, 2, 3]:
+                break
+            else:
+                print("\nNúmero inválido. Por favor, escolha um número da lista.")
+        except ValueError:
+            print("\nNúmero inválido. Por favor, escolha um número da lista.")
+    
+    return escolha  
+
+# ------------------------------------------------------

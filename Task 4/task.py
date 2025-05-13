@@ -1,6 +1,7 @@
 from functions import *
 from menus import *
 from draw import *
+from calculos import *
 
 """!
 @file task4.py
@@ -25,107 +26,82 @@ while True:
 
     clear_screen()  
     print(" \n-------------- Opções disponíveis: ---------------\n")
-    print(" Redes disponíveis:")
-    for i, ficheiro in enumerate(networks, 1):
-        display_name = ficheiro.replace('networks/', '')
-        print(f"  {i}. {display_name}")
-    print("")
-    print(" Outras opções:")
-    print("  5. Inserir outra rede")
-    print("  6. Sair")
+    print(" 1. Cálculo de caminhos")
+    print(" 2. Cálculos Estatísticos")
+    print(" 3. Sair")
     print("--------------------------------------------------")
     
-    escolha = int(input("Digite a opção pretendida: ")) - 1
+    escolha = int(input("Digite a opção pretendida: "))
     
-    if 0 <= escolha < len(networks) or escolha == 4:
+    if escolha==1:
+        G, node_mapping = show_ask_network()
         
-        if escolha == 4:
-            novo_ficheiro = ask_network()
-            if novo_ficheiro == "":
-                continue
-            else:
-                networks.append(novo_ficheiro)
-                escolha = len(networks) - 1
-        
-        with open(networks[escolha], 'r') as file:
+        draw_empty_network(G, node_mapping)
+
+        """!
+        @brief Solicita os nós de origem e destino ao user.
+        @param node_mapping Mapa dos nós.
+        @return origem Nó de origem escolhido pelo user.
+        @return destino Nó de destino escolhido pelo user.
+        """
+        # pedir nó origem e nó destino
+        origem, destino = ask_origin_destiny(node_mapping)
+
+        algoritmo = ask_which_algorithm()
+        clear_screen()
+
+        if algoritmo == 1:
 
             """!
-            @brief Leitura dos dados do ficheiro escolhido.
+            @brief Encontra os caminhos mais curtos entre os nós escolhidos.
+            @param G Grafo da rede.
+            @param origem Nó de origem.
+            @param destino Nó de destino.
+            @return caminho1 Primeiro caminho encontrado.
+            @return custo1 Custo do primeiro caminho.
+            @return caminho2 Segundo caminho encontrado.
+            @return custo2 Custo do segundo caminho.
             """
-            # leitura da info do ficheiro escolhido
-            network_data = file.read()
+            # encontrar os caminhos mais curtos
+            caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
 
             """!
-            @brief Criação do grafo e mapeamento dos nós.
-            @param network_data Dados da rede do ficheiro.
-            @return G Grafo criado.
-            @return node_mapping Mapa dos nós.
-            """
-            # criação do grafo e mapeamento dos nós
-            G, node_mapping = retrieve_data(network_data)
-
-            """!
-            @brief Exibe a rede antes de solicitar os nós de origem e destino.
+            @brief Desenha o grafo com os caminhos encontrados.
             @param G Grafo da rede.
             @param node_mapping Mapa dos nós.
+            @param origem Nó de origem.
+            @param destino Nó de destino.
+            @param caminho1 Caminho mais curto.
+            @param caminho2 Caminho Two Step Approach.
+            @param caminho3 Caminho Suurballe.
             """
-            # Mostrar a rede antes de pedir os nós, para o user poder escolher
-            draw_empty_network(G, node_mapping)
+            # desenhar o grafo
+            draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho_sur=None, caminho3 = None, algoritmo=algoritmo)
 
-            """!
-            @brief Solicita os nós de origem e destino ao user.
-            @param node_mapping Mapa dos nós.
-            @return origem Nó de origem escolhido pelo user.
-            @return destino Nó de destino escolhido pelo user.
-            """
-            # pedir nó origem e nó destino
-            origem, destino = ask_origin_destiny(node_mapping)
+        if algoritmo == 2:
 
-            algoritmo = ask_which_algorithm()
-            clear_screen()
+            option = ask_skip_forward()
+            caminho_sur, _, caminho3, _ = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
+            draw_network(G, node_mapping, origem, destino, None, None, caminho_sur, caminho3, algoritmo=algoritmo)            
+        if algoritmo == 3:
 
-            if algoritmo == 1:
+            option = 0
+            caminho_tsa, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
+            caminho_sur, _, caminho3, _ = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
+            draw_network(G, node_mapping, origem, destino, caminho_tsa, caminho2, caminho_sur, caminho3, algoritmo=algoritmo)
 
-                """!
-                @brief Encontra os caminhos mais curtos entre os nós escolhidos.
-                @param G Grafo da rede.
-                @param origem Nó de origem.
-                @param destino Nó de destino.
-                @return caminho1 Primeiro caminho encontrado.
-                @return custo1 Custo do primeiro caminho.
-                @return caminho2 Segundo caminho encontrado.
-                @return custo2 Custo do segundo caminho.
-                """
-                # encontrar os caminhos mais curtos
-                caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
-
-                """!
-                @brief Desenha o grafo com os caminhos encontrados.
-                @param G Grafo da rede.
-                @param node_mapping Mapa dos nós.
-                @param origem Nó de origem.
-                @param destino Nó de destino.
-                @param caminho1 Caminho mais curto.
-                @param caminho2 Caminho Two Step Approach.
-                @param caminho3 Caminho Suurballe.
-                """
-                # desenhar o grafo
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None, algoritmo=algoritmo)
-
-            if algoritmo == 2:
-
-                option = ask_skip_forward()
-                caminho1, caminho2 = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3 = None, algoritmo=algoritmo)
-            
-            if algoritmo == 3:
-
-                option = ask_skip_forward()
-                caminho1, custo1, caminho2, custo2 = find_best_paths(G, origem, destino, algoritmo=algoritmo)
-                caminho1, caminho3 = suurballe(G, origem, destino, algoritmo=algoritmo, option=option)
-                draw_network(G, node_mapping, origem, destino, caminho1, caminho2, caminho3, algoritmo=algoritmo)
-
-    elif escolha == 5:
+    
+    elif escolha == 2:
+        G, node_mapping = show_ask_network()
+        escolha = ask_which_calculus()
+        
+        if escolha == 1: 
+            calculo_taxa_resolusao(G)
+        if escolha == 2:
+            calculo_taxa_resolusao_otima(G)
+        if escolha == 3:
+            calculo_erro(G)
+    elif escolha == 3:
         clear_screen()
         print("Obrigad@! Volte Sempre!")
         break
