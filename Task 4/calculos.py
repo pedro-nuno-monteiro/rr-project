@@ -2,7 +2,6 @@ import itertools
 from functions import *
 from menus import *
 
-
 def calculos_auxiliares(G, otimo, calcular_erro_medio):
     pares = list(itertools.combinations(G.nodes, 2))
     resolvidos_tsa = 0
@@ -48,23 +47,20 @@ def calculos_auxiliares(G, otimo, calcular_erro_medio):
 def calculo_taxa_resolusao(G):
     
     pares, _,resolvidos_tsa, resolvidos_sur, _, _ = calculos_auxiliares(G, otimo=False, calcular_erro_medio=False)
-            
+    
     clear_screen()
     print("\n\n----------------- Taxa de resolução TSA -----------------\n")
-    
     print(f"Total de pares: {len(pares)}")
     print(f"Total de pares resolvidos pelo TSA: {resolvidos_tsa}")
     print(f"Taxa de resolução do TSA: {resolvidos_tsa / len(pares) * 100:.2f}%")
-    
     print("\n----------------- Taxa de resolução Surballe -----------------\n")
-    
     print(f"Total de pares: {len(pares)}")
     print(f"Total de pares resolvidos pelo Suurballe: {resolvidos_sur}")
     print(f"Taxa de resolução do Suurballe: {resolvidos_sur / len(pares) * 100:.2f}%")
-    
     print("\n---------------------------------------------------------------")
+
     input("Enter para continuar")
-    
+
 # ------------------------------------------------------   
 def calculo_taxa_resolusao_otima(G):
     
@@ -77,10 +73,9 @@ def calculo_taxa_resolusao_otima(G):
     print(f"Total de soluções ótimas: {resolvidos_sur}")
     print(f"Total de soluções ótimas encontradas pelo TSA: {resolvidos_otimos}")
     print(f"Taxa de resolução ótima: {resolvidos_otimos / resolvidos_sur * 100:.2f}%")
-   
     print("\n---------------------------------------------------------------")
     input("Enter para continuar")    
-    
+
 # ------------------------------------------------------    
 def calculo_erro(G):
     
@@ -92,5 +87,4 @@ def calculo_erro(G):
     print(f"Pares onde ambos TSA e Suurballe encontraram soluções: {pares_validos}")
     print(f"Erro médio do TSA em relação à solução ótima: {erro_medio:.2f}%")
     print("\n------------------------------------------------------")
-    
     input("Enter para continuar")
