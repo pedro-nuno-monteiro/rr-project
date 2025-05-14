@@ -393,26 +393,6 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
     P1 = merge_split_path(P1_final)
     P2 = merge_split_path(P2_final)
 
-    # Calcular custos dos caminhos
-    def path_cost(path, G):
-
-        """!
-        @brief Calcula o custo de um caminho no grafo G.
-        @param path Lista de nós representando o caminho.
-        @param graph_G O grafo NetworkX original.
-        @return O custo total do caminho, ou None se o caminho for inválido/vazio ou uma aresta não existir.
-        """
-
-        if not path or len(path) < 2:
-            return None
-        cost = 0
-        for u, v in zip(path[:-1], path[1:]):
-            if G.has_edge(u, v):
-                cost += G[u][v].get('cost', 1)
-            else:
-                return None
-        return cost
-
     cost1 = path_cost(P1, G)
     cost2 = path_cost(P2, G)
 
@@ -569,3 +549,24 @@ def is_valid_path(path, original_graph):
         if not original_graph.has_edge(u, v):
             return False
     return True
+
+# ------------------------------------------------------
+# Calcular custos dos caminhos
+def path_cost(path, G):
+
+    """!
+    @brief Calcula o custo de um caminho no grafo G.
+    @param path Lista de nós representando o caminho.
+    @param graph_G O grafo NetworkX original.
+    @return O custo total do caminho, ou None se o caminho for inválido/vazio ou uma aresta não existir.
+    """
+
+    if not path or len(path) < 2:
+        return None
+    cost = 0
+    for u, v in zip(path[:-1], path[1:]):
+        if G.has_edge(u, v):
+            cost += G[u][v].get('cost', 1)
+        else:
+            return None
+    return cost
