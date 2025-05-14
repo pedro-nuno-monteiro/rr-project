@@ -3,21 +3,40 @@ import matplotlib.pyplot as plt
 import math
 import matplotlib.lines as mlines
 
-def draw_network(G, node_mapping, origem, destino, caminho_tsa, caminho2, caminho_sur, caminho3, algoritmo):
-    """
-    Desenha o grafo destacando até três caminhos e os nós de origem e destino.
+"""!
+@file draw.py
+@brief Módulo para visualização de grafos e caminhos.
+Contém funções para desenhar grafos direcionados, destacando caminhos específicos encontrados por algoritmos como TSA e Suurballe, além de visualizações intermediárias.
+"""
 
-    @param G: Grafo direcionado.
-    @param node_mapping: Dicionário {índice: nome_do_nó}.
-    @param origem: Índice ou nome do nó de origem.
-    @param destino: Índice ou nome do nó de destino.
-    @param caminho1: Lista de nós do primeiro caminho (mais curto).
-    @param caminho2: Lista de nós do segundo caminho (Two-Step).
-    @param caminho3: Lista de nós do terceiro caminho (Suurballe).
-    @param algoritmo: Inteiro que indica o algoritmo:
-        1 - Two Step Approach
-        2 - Suurballe
-        3 - Todos os três caminhos
+def draw_network(G, node_mapping, origem, destino, caminho_tsa, caminho2, caminho_sur, caminho3, algoritmo):
+    """!
+    @brief Desenha o grafo destacando até quatro caminhos e os nós de origem e destino.
+
+    Esta função visualiza o grafo, colorindo os nós de origem e destino e
+    desenhando os caminhos fornecidos com cores distintas. A legenda é ajustada
+    conforme o algoritmo selecionado.
+
+    @param G O grafo NetworkX direcionado.
+    @param node_mapping Dicionário que mapeia o índice numérico (ou identificador interno)
+                        ao nome real do nó (string) a ser exibido.
+    @param origem O nome (string) do nó de origem.
+    @param destino O nome (string) do nó de destino.
+    @param caminho_tsa Lista de nós (nomes) representando o primeiro caminho encontrado
+                       pelo Two-Step Approach (geralmente o mais curto). Pode ser None.
+    @param caminho2 Lista de nós (nomes) representando o segundo caminho disjunto
+                    encontrado pelo Two-Step Approach. Pode ser None.
+    @param caminho_sur Lista de nós (nomes) representando o primeiro caminho encontrado
+                       pelo algoritmo de Suurballe. Pode ser None.
+    @param caminho3 Lista de nós (nomes) representando o segundo caminho disjunto
+                    encontrado pelo algoritmo de Suurballe. Pode ser None.
+    @param algoritmo Inteiro que indica o(s) algoritmo(s) cujos resultados devem ser exibidos:
+                     1 - Apenas Two-Step Approach (usa `caminho_tsa` e `caminho2`).
+                     2 - Apenas Suurballe (usa `caminho_sur` e `caminho3`).
+                     3 - Ambos os algoritmos (TSA e Suurballe), exibidos em subplots separados.
+                         (usa `caminho_tsa`, `caminho2`, `caminho_sur`, `caminho3`).
+    @note Se `algoritmo` for 3, a função cria dois subplots. Caso contrário, um único plot.
+    @note A imagem gerada é guardada em "output/Rede Final.png".
     """
 
     pos = nx.get_node_attributes(G, 'pos')
@@ -150,14 +169,16 @@ def draw_network(G, node_mapping, origem, destino, caminho_tsa, caminho2, caminh
 # ------------------------------------------------------
 def draw_empty_network(G, node_mapping):
     """!
-    @brief Desenha uma rede vazia, sem destacar caminhos ou nós.
+    @brief Desenha uma rede vazia, sem destacar caminhos ou nós específicos.
 
-    Esta função gera uma visualização gráfica do grafo sem destacar nenhum caminho ou nó específico.
+    Esta função gera uma visualização gráfica do grafo, mostrando apenas os nós com os seus
+    rótulos (índice e nome) e as arestas. Não há destaque para origem, destino ou caminhos.
 
-    @param G O grafo direcionado a ser desenhado.
-    @param node_mapping Mapa de nós, associando índices aos nomes dos nós no grafo.
-    
-    @note Esta função é útil para exibir apenas a estrutura do grafo sem informações adicionais, como os caminhos ou a origem/destino.
+    @param G O grafo NetworkX direcionado a ser desenhado.
+    @param node_mapping Mapa de nós, associando índices numéricos (ou identificadores internos)
+                        aos nomes reais dos nós (strings) no grafo.
+    @note Esta função é útil para exibir apenas a estrutura do grafo.
+    @note A imagem gerada é guardada em "output/Rede Original.png".
     """
     # Obtém as coordenadas dos nós do grafo
     pos = nx.get_node_attributes(G, 'pos')
@@ -192,17 +213,24 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     """!
     @brief Desenha um grafo dividido ou transformado e destaca os caminhos encontrados pelo algoritmo Suurballe.
 
-    A função visualiza o grafo após a aplicação do algoritmo Suurballe, destacando os caminhos mais curtos (se encontrados) e as arestas internas (no formato '_in'/'_out'). Cada etapa do algoritmo é ilustrada, mostrando o estado atual do grafo, o primeiro caminho mais curto em verde e o segundo caminho (se houver) em azul.
+    A função visualiza o grafo após a aplicação de uma etapa do algoritmo Suurballe,
+    destacando os caminhos encontrados (se fornecidos) e as arestas internas
+    (no formato '_in'/'_out').
 
-    @param G Grafo direcionado (potencialmente dividido), representando a rede.
-    @param origem_split Nó de origem no formato dividido (com sufixo '_out').
-    @param destino_split Nó de destino no formato dividido (com sufixo '_in').
-    @param caminho1_split Lista de nós representando o primeiro caminho encontrado (caminho mais curto).
-    @param caminho2_split Lista de nós representando o segundo caminho encontrado (pode ser None).
-    @param filename Nome do arquivo usado para salvar a imagem gerada, representando o estado atual do grafo.
-    
-    @note A função cria uma visualização do grafo, destacando os caminhos e as arestas em diferentes cores para facilitar a compreensão do algoritmo.
-    @note As arestas internas (de um nó dividido) são desenhadas com uma linha tracejada e de cor prata.
+    @param G Grafo NetworkX direcionado (potencialmente dividido/transformado), representando a rede.
+    @param origem_split Nó de origem no formato dividido (p.ex., 'A_out') ou original.
+    @param destino_split Nó de destino no formato dividido (p.ex., 'B_in') ou original.
+    @param caminho1_split Lista de nós representando o primeiro caminho encontrado nesta etapa
+                          (pode ser None). Será desenhado a verde.
+    @param caminho2_split Lista de nós representando o segundo caminho encontrado nesta etapa
+                          (pode ser None). Será desenhado a azul.
+    @param filename Nome base do arquivo (sem extensão) usado para salvar a imagem gerada,
+                    representando o estado atual do grafo (p.ex., "Step 1 - Primeiro Caminho").
+    @note A função cria uma visualização do grafo, destacando os caminhos e as arestas
+          em diferentes cores para facilitar a compreensão do algoritmo.
+    @note As arestas internas (de um nó dividido, ligando `X_in` a `X_out`) são desenhadas
+          com uma linha tracejada e de cor prata.
+    @note A imagem é guardada em "output/{filename}.png".
     """
     print(f"\n * A desenhar: {filename}")
     # Cria uma nova figura para cada passo para evitar sobreposição

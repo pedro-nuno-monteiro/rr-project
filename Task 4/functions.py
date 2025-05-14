@@ -1,16 +1,30 @@
 import networkx as nx
 from draw import *
 
+"""!
+@file functions.py
+@brief Módulo com funções principais para manipulação de grafos e algoritmos de caminhos.
+Inclui funções para processar dados de entrada, encontrar caminhos disjuntos com TSA e Suurballe, e realizar transformações no grafo como node splitting.
+"""
+
 def retrieve_data(data):
     
     """!
-    @brief Processa os dados de entrada, para criar um grafo direcionado.
-    
-    Esta função extrai informações de nós e links dos dados de entrada fornecidos pelo ficheiro de entrada.
-    Cria um grafo direcionado, onde cada nó é adicionado com suas coordenadas e cada link é estabelecido. 
+    @brief Processa os dados de entrada (string) para criar um grafo direcionado NetworkX.
 
-    @param data A string de entrada contém os dados a serem analisados. Deve conter seções para nós e links.
-    @return Um grafo direcionado, onde os nós são conectados por links conforme o ficheiro de entrada.
+    Esta função analisa uma string contendo informações sobre nós (com coordenadas)
+    e links (arestas com custos) para construir um grafo. Os nós são adicionados
+    com um atributo 'pos' para as suas coordenadas, e as arestas são adicionadas
+    com um atributo 'cost'. As arestas são consideradas bidirecionais (adiciona
+    target->source com o mesmo custo).
+
+    @param data A string de entrada que contém os dados da rede a serem analisados.
+                Deve seguir um formato específico com seções "NODES (...)" e "LINKS (...)".
+
+    @return Tuple (G, node_mapping):
+        - G (nx.DiGraph): O grafo direcionado criado a partir dos dados.
+        - node_mapping (dict): Um dicionário que mapeia um índice numérico (baseado na ordem
+                               de leitura dos nós) para o nome (string) de cada nó.
     """
 
     # cria um grafo direcionado
@@ -80,21 +94,28 @@ def retrieve_data(data):
 
 def find_best_paths(G, origem, destino, algoritmo):
     """!
-    @brief Encontra os dois melhores caminhos disjuntos entre os dois nós com base no menor custo.
+    @brief Encontra os dois melhores caminhos disjuntos em termos de nós (exceto origem/destino)
+           entre dois nós, com base no menor custo, usando a abordagem Two-Step.
 
-    Esta função primeiro calcula o caminho mais curto entre os nós de origem e destino.
-    Em seguida, remove todos os nós e arestas intermediários envolvidos no primeiro caminho,
-    garantindo que o segundo caminho seja completamente disjunto. Se não existir um segundo caminho, notifica o usuário.
+    Esta função primeiro calcula o caminho mais curto (path1) entre os nós de origem e
+    destino usando Dijkstra (baseado no atributo 'cost' das arestas).
+    Em seguida, cria uma cópia do grafo e remove todas as arestas de path1 e todos os
+    nós intermediários de path1 (nós que não são nem a origem nem o destino).
+    Depois, calcula o caminho mais curto (path2) nesta cópia modificada do grafo.
+    Se não existir um segundo caminho, notifica e retorna None para path2 e cost2.
 
-    @param G O grafo direcionado.
-    @param origem O nó de origem.
-    @param destino O nó de destino.
+    @param G O grafo NetworkX direcionado.
+    @param origem O nome (string) do nó de origem.
+    @param destino O nome (string) do nó de destino.
+    @param algoritmo Inteiro que indica o contexto do algoritmo (p.ex., 1 para TSA, 3 para Ambos).
+                     Usado para controlar mensagens de impressão específicas do algoritmo.
+                     Se None, impressões genéricas ou nenhumas são feitas.
 
     @return Tuple (path1, cost1, path2, cost2), onde:
-        - path1: O primeiro caminho mais curto.
-        - cost1: O custo total do primeiro caminho.
-        - path2: O segundo caminho mais curto (caso contrário, None).
-        - cost2: O custo total do segundo caminho (caso contrário, None).
+        - path1 (list/None): O primeiro caminho mais curto (lista de nós). None se não houver caminho.
+        - cost1 (float/None): O custo total do primeiro caminho. None se não houver caminho.
+        - path2 (list/None): O segundo caminho mais curto disjunto em nós. None se não existir.
+        - cost2 (float/None): O custo total do segundo caminho. None se não existir.
     """
 
     # primeiro - verificar se existe caminho entre nós selecionados
@@ -153,17 +174,34 @@ def find_best_paths(G, origem, destino, algoritmo):
 
 def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
     """!
-    @brief Implementa o algoritmo de Suurballe para encontrar dois caminhos disjuntos em um grafo.
+    @brief Implementa o algoritmo de Suurballe para encontrar dois caminhos disjuntos em arestas
+           entre nós de origem e destino num grafo.
 
-    Esta função utiliza o algoritmo de Suurballe para encontrar dois caminhos mais curtos disjuntos entre dois nós de um grafo direcionado. O primeiro caminho é encontrado usando o algoritmo de Dijkstra, e o segundo caminho é calculado após a remoção dos nós pertencentes ao primeiro caminho.
+    O algoritmo segue vários passos:
+    0. Encontra um caminho inicial P1_original no grafo G.
+    0.5. Realiza "node splitting" nos nós de P1_original, criando um grafo H.
+    1. Encontra o primeiro caminho P1_split no grafo transformado H.
+    2. Transforma a rede H: calcula custos reduzidos, remove/inverte arcos de P1_split.
+    3. Encontra o segundo caminho P2_split no grafo residual H_residual.
+    4. Remove arcos opostos (desentrelaçamento) para formar os caminhos finais P1 e P2.
+    Finalmente, os caminhos P1 e P2 são mapeados de volta para os nós do grafo original.
 
-    @param G Grafo direcionado em que os caminhos serão calculados.
-    @param origem_orig Nó de origem no grafo.
-    @param destino_orig Nó de destino no grafo.
-    
-    @return Uma lista contendo dois caminhos: o primeiro caminho mais curto e o segundo caminho mais curto disjunto.
+    @param G O grafo NetworkX direcionado original.
+    @param origem_orig O nome (string) do nó de origem no grafo original.
+    @param destino_orig O nome (string) do nó de destino no grafo original.
+    @param algoritmo Inteiro que indica o contexto (p.ex., 2 para Suurballe, 3 para Ambos).
+                     Controla impressões e, potencialmente, chamadas de desenho.
+    @param option Booleano. Se True, salta o desenho dos passos intermédios do Suurballe.
+                  Usado para acelerar quando apenas o resultado final é desejado.
+    @param calculo Booleano. Se True, suprime a maioria das mensagens de impressão.
+                   Útil quando a função é chamada em loop para cálculos estatísticos.
 
-    @note Caso o segundo caminho não exista, o valor retornado será `None` para o segundo caminho.
+    @return Tuple (P1, cost1, P2, cost2), onde:
+        - P1 (list/None): O primeiro caminho disjunto em arestas (lista de nós).
+                          None se nenhum caminho for encontrado.
+        - cost1 (float/None): O custo total do primeiro caminho. None se P1 for None.
+        - P2 (list/None): O segundo caminho disjunto em arestas. None se não existir.
+        - cost2 (float/None): O custo total do segundo caminho. None se P2 for None.
     """
 
     # --- PASSO 0: Encontrar P1 no grafo original ---
@@ -357,6 +395,14 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
 
     # Calcular custos dos caminhos
     def path_cost(path, G):
+
+        """!
+        @brief Calcula o custo de um caminho no grafo G.
+        @param path Lista de nós representando o caminho.
+        @param graph_G O grafo NetworkX original.
+        @return O custo total do caminho, ou None se o caminho for inválido/vazio ou uma aresta não existir.
+        """
+
         if not path or len(path) < 2:
             return None
         cost = 0
@@ -392,15 +438,33 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
 def split_nodes(G, source_orig, target_orig, path=None):
 
     """!
-    @brief Divide os nós de um grafo em nós de entrada e saída.
+    @brief Divide os nós especificados de um grafo G em nós de entrada (`_in`) e saída (`_out`).
 
-    Esta função divide cada nó de um grafo em dois nós: um nó de entrada (no formato `A_in`) e um nó de saída (no formato `A_out`). Ela cria um novo grafo com esses nós divididos e ajusta as arestas entre eles. A origem e o destino também são ajustados para os nós de saída e entrada, respectivamente.
+    Cria um novo grafo H. Para cada nó no `path` fornecido (ou todos os nós se `path`
+    for None e a lógica for ajustada, mas atualmente foca no `path`),
+    o nó `N` é substituído por `N_in` e `N_out`. Uma aresta interna de `N_in` para
+    `N_out` com custo zero é adicionada.
+    As arestas originais `(U, V)` em G são remapeadas em H:
+    - Se U foi dividido: de `U_out`
+    - Se V foi dividido: para `V_in`
+    Os nós de origem e destino (`source_orig`, `target_orig`) são mapeados para
+    suas versões `_out` e `_in` respectivamente, se foram divididos.
 
-    @param G Grafo direcionado original a ser dividido.
-    @param source_orig Nó de origem no grafo original.
-    @param target_orig Nó de destino no grafo original.
+    @param G Grafo NetworkX direcionado original a ser transformado.
+    @param source_orig O nome (string) do nó de origem no grafo G.
+    @param target_orig O nome (string) do nó de destino no grafo G.
+    @param path Opcional. Uma lista de nós (strings, nomes dos nós) que devem ser divididos.
+                Se um nó está neste `path`, ele será dividido. Nós não presentes
+                no `path` não são divididos e mantêm o seu nome original em H.
+                Se `path` for `None` ou vazio, nenhum nó é dividido desta forma específica,
+                mas `source_orig` e `target_orig` podem ainda ser tratados como `_out`/`_in`
+                se fizerem parte do conjunto de nós a dividir (que neste caso seria vazio).
+                A lógica atual implica que APENAS nós em `path` são divididos.
 
-    @return Um grafo direcionado `H` com nós divididos, o novo nó de origem `s` (com sufixo `_out`), e o novo nó de destino `t` (com sufixo `_in`).
+    @return Tuple (H, s, t):
+        - H (nx.DiGraph): O novo grafo com nós divididos.
+        - s (str): O nó de origem em H (p.ex., `source_orig_out` ou `source_orig`).
+        - t (str): O nó de destino em H (p.ex., `target_orig_in` ou `target_orig`).
     """
     
     # fazemos as alterações num grafo copiado
@@ -459,13 +523,17 @@ def merge_split_path(split_path):
     """!
     @brief Converte um caminho do grafo dividido (com nós '_in'/'_out') de volta para os nomes originais dos nós.
 
-    Esta função recebe um caminho que foi gerado a partir de um grafo dividido (onde os nós foram modificados para incluir sufixos '_in' e '_out') e converte esse caminho de volta para os nomes dos nós originais. Ela remove os sufixos '_in' e '_out' e retorna o caminho com os nós originais.
+    Esta função recebe uma lista de nós que podem ter sufixos '_in' ou '_out'
+    (indicando que vieram de um processo de "node splitting") e remove esses
+    sufixos para retornar uma lista de nomes de nós originais. Nós consecutivos
+    no caminho que mapeiam para o mesmo nó original são consolidados (apenas uma
+    instância do nó original é mantida).
 
-    @param split_path Caminho com os nós divididos (com sufixos '_in' ou '_out').
-
-    @return Um caminho com os nomes dos nós originais, sem os sufixos '_in' ou '_out'.
-    
-    @note Caso o caminho esteja vazio, a função retorna uma lista vazia.
+    @param split_path Lista de strings, onde cada string é um nome de nó do grafo dividido.
+                      Pode conter nomes como 'A_in', 'A_out', ou 'B' (se 'B' não foi dividido).
+    @return Uma lista de strings com os nomes dos nós originais, sem sufixos e sem
+            duplicatas consecutivas. Retorna lista vazia se `split_path` for None ou vazio.
+    @note Exemplo: ['S_out', 'A_in', 'A_out', 'B_in', 'B_out', 'T_in'] -> ['S', 'A', 'B', 'T']
     """
     
     if not split_path: return []
@@ -478,7 +546,22 @@ def merge_split_path(split_path):
 
 # ------------------------------------------------------
 def is_valid_path(path, original_graph):
-    """Verifica se um caminho no grafo split corresponde a um caminho válido no original."""
+
+    """!
+    @brief Verifica se um caminho (potencialmente de um grafo dividido) corresponde a um caminho
+           válido no grafo original.
+
+    Primeiro, o `path` (que pode conter nós com sufixos `_in`/`_out`) é convertido
+    para um caminho com nomes de nós originais usando `merge_split_path`.
+    Depois, verifica-se se cada par consecutivo de nós no caminho merged forma uma
+    aresta existente no `original_graph`.
+
+    @param path A lista de nós do caminho, possivelmente com sufixos `_in`/`_out`.
+    @param original_graph O grafo NetworkX original (sem nós divididos).
+    @return True se o caminho merged for válido (não vazio, com pelo menos 2 nós, e todas
+            as arestas existem no `original_graph`), False caso contrário.
+    """
+
     merged_path = merge_split_path(path)
     if not merged_path or len(merged_path) < 2:
         return False
