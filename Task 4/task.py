@@ -55,6 +55,9 @@ def main():
 
         if escolha==1:
             G, node_mapping = show_ask_network()
+            
+            if G is None and node_mapping is None:
+                continue
 
             draw_empty_network(G, node_mapping)
 
@@ -113,6 +116,8 @@ def main():
 
         elif escolha == 2:
             G, node_mapping = show_ask_network()
+            if G is None and node_mapping is None:
+                continue
             escolha = ask_which_calculus()
 
             if escolha == 1: 

@@ -39,15 +39,17 @@ def show_ask_network():
         display_name = ficheiro.replace('networks/', '')
         print(f"  {i}. {display_name}")
         
-    print("\n  5. Inserir outra rede")
+    print(f"\n  {i+1}. Inserir outra rede")
     print(" ---------------------------------------------\n")
     escolha = int(input("Selecione a rede pretendida: ")) - 1
     
-    if escolha == 4:
+    if escolha == len(networks):
             novo_ficheiro = ask_network()
             if novo_ficheiro != "":
                 networks.append(novo_ficheiro)
                 escolha = len(networks) - 1
+            else:
+                return None, None
                 
     with open(networks[escolha], 'r') as file:
         """!
@@ -89,15 +91,22 @@ def ask_network():
     
     novo_ficheiro = input("Digite o nome da rede (com extensão .txt): ")
     caminho_ficheiro = f"networks/{novo_ficheiro}"
+    
+    
     if caminho_ficheiro.endswith('.txt'):
-        return caminho_ficheiro
+        if not os.path.exists(caminho_ficheiro):
+            clear_screen()
+            print("O ficheiro não foi encontrado. Tente novamente.")
+            input("Pressione Enter para continuar...")
+            return ""
+        else:
+            return caminho_ficheiro
     else:
         clear_screen()
         print("O nome do arquivo deve terminar com '.txt'. Tente novamente.")
-        
-    if FileNotFoundError: 
-        print(f"Arquivo '{novo_ficheiro}' não encontrado. O ficheiro tem de estar na pasta networks. Tente novamente.")
-
+        input("Pressione Enter para continuar...")
+        return ""
+            
 # ------------------------------------------------------
 def ask_origin_destiny(node_mapping):
     

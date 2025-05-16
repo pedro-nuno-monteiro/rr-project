@@ -551,7 +551,6 @@ def is_valid_path(path, original_graph):
     return True
 
 # ------------------------------------------------------
-# Calcular custos dos caminhos
 def path_cost(path, G):
 
     """!
