@@ -53,7 +53,7 @@ def main():
 
         escolha = int(input("Digite a opção pretendida: "))
 
-        if escolha==1:
+        if escolha == 1:
             G, node_mapping = show_ask_network()
             
             if G is None and node_mapping is None:
