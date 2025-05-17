@@ -273,7 +273,6 @@ def draw_suurballe(G, origem_split, destino_split, caminho1_split, caminho2_spli
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels,
                                 font_size=7, font_color='darkblue',
                                 label_pos=0.4,
-                                connectionstyle='arc3, rad=0.1',
                                 bbox=dict(facecolor='white', alpha=0.4, edgecolor='none', boxstyle='round,pad=0.1'))
 
     # Destaca caminho 1 (verde)
