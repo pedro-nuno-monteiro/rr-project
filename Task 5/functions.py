@@ -350,15 +350,17 @@ def suurballe(G, origem_orig, destino_orig, algoritmo, option, calculo):
     for i, (u1, v1) in enumerate(P1_edges):
         for j, (u2, v2) in enumerate(P2_edges):
             if u1 == v2 and v1 == u2:
-                arcos_em_comum.add(u1)
-                arcos_em_comum.add(v1)
+                arcos_em_comum.add((u1, v1))
+                arcos_em_comum.add((u2, v2))
     
     # Criar um grafo com todas as arestas de ambos os caminhos
     deinterlace_graph = nx.DiGraph()
     for u, v in P1_edges:
-        deinterlace_graph.add_edge(u, v)
+        if (u,v) not in arcos_em_comum:
+            deinterlace_graph.add_edge(u, v)
     for u, v in P2_edges:
-        deinterlace_graph.add_edge(u, v)
+        if (u,v) not in arcos_em_comum:
+            deinterlace_graph.add_edge(u, v)
 
     if algoritmo == 2 and not option and arcos_em_comum:
         draw_suurballe(H_residual, s, t, P1_split, P2_split, "Step 4 - Grafo com Arcos em Comum")
@@ -453,7 +455,12 @@ def split_nodes(G, source_orig, target_orig, path=None):
     # Mapeia nome original -> (nome_in, nome_out)
     new_mapping = {} 
 
-    nodes_to_split = set(path) if path else set()
+    nodes_to_split = set()
+    if path:
+        for node in path:
+            if node != source_orig and node != target_orig:
+                nodes_to_split.add(node)
+
 
     # --- Cria nós divididos e arestas internas ---
     for node in G.nodes():
